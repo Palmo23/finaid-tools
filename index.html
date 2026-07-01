@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Financial Aid Toolkit</title>
+<title>Financial Aid Toolkit | Stockton University</title>
 
 <style>
 
@@ -20,26 +20,57 @@ background:#f4f6f8;
 color:#222;
 }
 
+/* Skip link - hidden until focused, first focusable element on the page */
+.skip-link{
+position:absolute;
+left:-9999px;
+top:0;
+background:#FFC423;
+color:#000000;
+padding:12px 20px;
+font-weight:bold;
+z-index:1000;
+border-radius:0 0 6px 0;
+}
+
+.skip-link:focus{
+left:0;
+}
+
+:focus-visible{
+outline:3px solid #0069AA;
+outline-offset:2px;
+}
+
 header{
-background:#006747;
-color:white;
-padding:25px;
+background:#0069AA;
+color:#FFFFFF;
+padding:28px 32px;
 box-shadow:0 2px 8px rgba(0,0,0,.15);
+border-bottom:4px solid #FFC423;
+}
+
+header .header-inner{
+max-width:1200px;
+margin:0 auto;
 }
 
 header h1{
 font-size:34px;
-margin-bottom:5px;
+margin-bottom:6px;
 }
 
 header p{
-opacity:.9;
+color:#E8EFF6;
+font-size:15px;
 }
 
 .container{
 display:grid;
 grid-template-columns:250px 1fr;
-min-height:calc(100vh - 100px);
+min-height:calc(100vh - 110px);
+max-width:1200px;
+margin:0 auto;
 }
 
 aside{
@@ -50,7 +81,10 @@ padding:25px;
 
 aside h3{
 margin-bottom:20px;
-color:#006747;
+color:#0069AA;
+font-size:14px;
+text-transform:uppercase;
+letter-spacing:.04em;
 }
 
 aside ul{
@@ -62,17 +96,28 @@ margin-bottom:15px;
 }
 
 aside a{
-text-decoration:none;
-color:#333;
+text-decoration:underline;
+text-decoration-color:transparent;
+color:#0069AA;
 font-weight:bold;
+transition:text-decoration-color .15s;
 }
 
-aside a:hover{
-color:#006747;
+aside a:hover,
+aside a:focus-visible{
+color:#002A5C;
+text-decoration-color:#002A5C;
 }
 
 main{
 padding:35px;
+}
+
+label.search-label{
+display:block;
+font-weight:bold;
+color:#0069AA;
+margin-bottom:8px;
 }
 
 .search{
@@ -80,8 +125,15 @@ width:100%;
 padding:14px;
 font-size:16px;
 border-radius:8px;
-border:1px solid #ccc;
+border:2px solid #6C6F70;
 margin-bottom:35px;
+color:#222;
+}
+
+.search:focus-visible{
+outline:3px solid #0069AA;
+outline-offset:2px;
+border-color:#0069AA;
 }
 
 .category{
@@ -90,7 +142,10 @@ margin-bottom:40px;
 
 .category h2{
 margin-bottom:20px;
-color:#006747;
+color:#0069AA;
+border-bottom:2px solid #FFC423;
+display:inline-block;
+padding-bottom:4px;
 }
 
 .grid{
@@ -103,6 +158,7 @@ gap:20px;
 background:white;
 padding:25px;
 border-radius:12px;
+border:1px solid #e2e5e8;
 box-shadow:0 2px 8px rgba(0,0,0,.08);
 transition:.25s;
 cursor:pointer;
@@ -114,24 +170,43 @@ display:block;
 .card:hover{
 transform:translateY(-4px);
 box-shadow:0 6px 18px rgba(0,0,0,.18);
+border-color:#0069AA;
 }
 
 .card h3{
 margin-bottom:10px;
-color:#006747;
+color:#0069AA;
 }
 
 .card p{
 font-size:14px;
-color:#666;
+color:#444;
 line-height:1.5;
+}
+
+/* Featured card style for the new guide link */
+.card.featured{
+background:#FFC423;
+border-color:#CE8E00;
+}
+
+.card.featured h3,
+.card.featured p{
+color:#000000;
+}
+
+.no-results{
+color:#444;
+font-style:italic;
 }
 
 footer{
 text-align:center;
 padding:20px;
-color:#777;
+color:#444;
 font-size:13px;
+border-top:1px solid #ddd;
+background:white;
 }
 
 @media(max-width:900px){
@@ -153,17 +228,20 @@ border-bottom:1px solid #ddd;
 
 <body>
 
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
 <header>
-
+<div class="header-inner">
 <h1>Financial Aid Toolkit</h1>
-
 <p>Stockton University Office of Financial Aid</p>
-
+</div>
 </header>
 
 <div class="container">
 
 <aside>
+
+<nav aria-label="Toolkit sections">
 
 <h3>Navigation</h3>
 
@@ -173,26 +251,28 @@ border-bottom:1px solid #ddd;
 
 <li><a href="#grant">Grant Calculators</a></li>
 
-<li><a href="#email">Email Tools</a></li>
-
 <li><a href="#reference">Reference</a></li>
 
 </ul>
 
+</nav>
+
 </aside>
 
-<main>
+<main id="main-content">
 
+<label class="search-label" for="search">Search calculators</label>
 <input
 class="search"
 type="text"
 id="search"
-placeholder="Search calculators..."
+placeholder="e.g. loan, grant, aid guide"
+autocomplete="off"
 >
 
-<section class="category" id="loan">
+<section class="category" id="loan" aria-labelledby="loan-heading">
 
-<h2>Loan Calculators</h2>
+<h2 id="loan-heading">Loan Calculators</h2>
 
 <div class="grid">
 
@@ -204,19 +284,11 @@ placeholder="Search calculators..."
 
 </a>
 
-<a class="card tool" href="calculators/plus-loan.html">
+<a class="card tool featured" href="obbba-financial-aid-guide_v5.html">
 
-<h3>Parent PLUS Calculator</h3>
+<h3>OBBBA Financial Aid Guide</h3>
 
-<p>Calculate Parent PLUS borrowing including origination fees.</p>
-
-</a>
-
-<a class="card tool" href="calculators/loan-fees.html">
-
-<h3>Loan Fee Calculator</h3>
-
-<p>Estimate net loan disbursements after federal loan fees.</p>
+<p>Reference guide covering One Big Beautiful Bill Act (OBBBA) changes affecting federal financial aid.</p>
 
 </a>
 
@@ -224,25 +296,17 @@ placeholder="Search calculators..."
 
 </section>
 
-<section class="category" id="grant">
+<section class="category" id="grant" aria-labelledby="grant-heading">
 
-<h2>Grant Calculators</h2>
+<h2 id="grant-heading">Grant Calculators</h2>
 
 <div class="grid">
 
-<a class="card tool" href="calculators/summer-pell.html">
+<a class="card tool" href="calculators/summer-2025-aid.html">
 
-<h3>Summer Pell Calculator</h3>
+<h3>Summer 2025 Aid Calculator</h3>
 
-<p>Estimate Pell Grant eligibility for summer enrollment.</p>
-
-</a>
-
-<a class="card tool" href="calculators/tag.html">
-
-<h3>TAG Calculator</h3>
-
-<p>Estimate New Jersey Tuition Aid Grant awards.</p>
+<p>Estimate grant and aid eligibility for Summer 2025 enrollment.</p>
 
 </a>
 
@@ -250,35 +314,9 @@ placeholder="Search calculators..."
 
 </section>
 
-<section class="category" id="email">
+<section class="category" id="reference" aria-labelledby="reference-heading">
 
-<h2>Email Tools</h2>
-
-<div class="grid">
-
-<a class="card tool" href="email-tools/appeals.html">
-
-<h3>Appeal Generator</h3>
-
-<p>Create appeal responses using approved office language.</p>
-
-</a>
-
-<a class="card tool" href="email-tools/sap.html">
-
-<h3>SAP Email Generator</h3>
-
-<p>Generate Satisfactory Academic Progress emails.</p>
-
-</a>
-
-</div>
-
-</section>
-
-<section class="category" id="reference">
-
-<h2>Reference</h2>
+<h2 id="reference-heading">Reference</h2>
 
 <div class="grid">
 
@@ -294,31 +332,38 @@ placeholder="Search calculators..."
 
 </section>
 
+<p id="no-results" class="no-results" hidden>No calculators match your search.</p>
+
 </main>
 
 </div>
 
 <footer>
 
-Financial Aid Toolkit • Version 1.0
+Financial Aid Toolkit • Version 1.1
 
 </footer>
 
 <script>
 
 const search=document.getElementById("search");
+const noResults=document.getElementById("no-results");
 
 search.addEventListener("keyup",()=>{
 
 const value=search.value.toLowerCase();
+let visibleCount=0;
 
 document.querySelectorAll(".tool").forEach(card=>{
 
 const text=card.innerText.toLowerCase();
-
-card.style.display=text.includes(value)?"block":"none";
+const match=text.includes(value);
+card.style.display=match?"block":"none";
+if(match) visibleCount++;
 
 });
+
+noResults.hidden = visibleCount !== 0;
 
 });
 
