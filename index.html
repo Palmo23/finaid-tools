@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Financial Aid Toolkit</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+background:#f4f6f8;
+color:#222;
+}
+
+header{
+background:#006747;
+color:white;
+padding:25px;
+box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
+
+header h1{
+font-size:34px;
+margin-bottom:5px;
+}
+
+header p{
+opacity:.9;
+}
+
+.container{
+display:grid;
+grid-template-columns:250px 1fr;
+min-height:calc(100vh - 100px);
+}
+
+aside{
+background:white;
+border-right:1px solid #ddd;
+padding:25px;
+}
+
+aside h3{
+margin-bottom:20px;
+color:#006747;
+}
+
+aside ul{
+list-style:none;
+}
+
+aside li{
+margin-bottom:15px;
+}
+
+aside a{
+text-decoration:none;
+color:#333;
+font-weight:bold;
+}
+
+aside a:hover{
+color:#006747;
+}
+
+main{
+padding:35px;
+}
+
+.search{
+width:100%;
+padding:14px;
+font-size:16px;
+border-radius:8px;
+border:1px solid #ccc;
+margin-bottom:35px;
+}
+
+.category{
+margin-bottom:40px;
+}
+
+.category h2{
+margin-bottom:20px;
+color:#006747;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+gap:20px;
+}
+
+.card{
+background:white;
+padding:25px;
+border-radius:12px;
+box-shadow:0 2px 8px rgba(0,0,0,.08);
+transition:.25s;
+cursor:pointer;
+text-decoration:none;
+color:#222;
+display:block;
+}
+
+.card:hover{
+transform:translateY(-4px);
+box-shadow:0 6px 18px rgba(0,0,0,.18);
+}
+
+.card h3{
+margin-bottom:10px;
+color:#006747;
+}
+
+.card p{
+font-size:14px;
+color:#666;
+line-height:1.5;
+}
+
+footer{
+text-align:center;
+padding:20px;
+color:#777;
+font-size:13px;
+}
+
+@media(max-width:900px){
+
+.container{
+grid-template-columns:1fr;
+}
+
+aside{
+border-right:none;
+border-bottom:1px solid #ddd;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<h1>Financial Aid Toolkit</h1>
+
+<p>Stockton University Office of Financial Aid</p>
+
+</header>
+
+<div class="container">
+
+<aside>
+
+<h3>Navigation</h3>
+
+<ul>
+
+<li><a href="#loan">Loan Calculators</a></li>
+
+<li><a href="#grant">Grant Calculators</a></li>
+
+<li><a href="#email">Email Tools</a></li>
+
+<li><a href="#reference">Reference</a></li>
+
+</ul>
+
+</aside>
+
+<main>
+
+<input
+class="search"
+type="text"
+id="search"
+placeholder="Search calculators..."
+>
+
+<section class="category" id="loan">
+
+<h2>Loan Calculators</h2>
+
+<div class="grid">
+
+<a class="card tool" href="calculators/loan-proration.html">
+
+<h3>Loan Proration Calculator</h3>
+
+<p>Federal Direct Loan proration calculator for graduating students.</p>
+
+</a>
+
+<a class="card tool" href="calculators/plus-loan.html">
+
+<h3>Parent PLUS Calculator</h3>
+
+<p>Calculate Parent PLUS borrowing including origination fees.</p>
+
+</a>
+
+<a class="card tool" href="calculators/loan-fees.html">
+
+<h3>Loan Fee Calculator</h3>
+
+<p>Estimate net loan disbursements after federal loan fees.</p>
+
+</a>
+
+</div>
+
+</section>
+
+<section class="category" id="grant">
+
+<h2>Grant Calculators</h2>
+
+<div class="grid">
+
+<a class="card tool" href="calculators/summer-pell.html">
+
+<h3>Summer Pell Calculator</h3>
+
+<p>Estimate Pell Grant eligibility for summer enrollment.</p>
+
+</a>
+
+<a class="card tool" href="calculators/tag.html">
+
+<h3>TAG Calculator</h3>
+
+<p>Estimate New Jersey Tuition Aid Grant awards.</p>
+
+</a>
+
+</div>
+
+</section>
+
+<section class="category" id="email">
+
+<h2>Email Tools</h2>
+
+<div class="grid">
+
+<a class="card tool" href="email-tools/appeals.html">
+
+<h3>Appeal Generator</h3>
+
+<p>Create appeal responses using approved office language.</p>
+
+</a>
+
+<a class="card tool" href="email-tools/sap.html">
+
+<h3>SAP Email Generator</h3>
+
+<p>Generate Satisfactory Academic Progress emails.</p>
+
+</a>
+
+</div>
+
+</section>
+
+<section class="category" id="reference">
+
+<h2>Reference</h2>
+
+<div class="grid">
+
+<a class="card tool" href="resources/policies.html">
+
+<h3>Office Policies</h3>
+
+<p>Internal financial aid references and procedures.</p>
+
+</a>
+
+</div>
+
+</section>
+
+</main>
+
+</div>
+
+<footer>
+
+Financial Aid Toolkit • Version 1.0
+
+</footer>
+
+<script>
+
+const search=document.getElementById("search");
+
+search.addEventListener("keyup",()=>{
+
+const value=search.value.toLowerCase();
+
+document.querySelectorAll(".tool").forEach(card=>{
+
+const text=card.innerText.toLowerCase();
+
+card.style.display=text.includes(value)?"block":"none";
+
+});
+
+});
+
+</script>
+
+</body>
+</html>
