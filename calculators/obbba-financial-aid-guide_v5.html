@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OBBBA Financial Aid Updates – Stockton University</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:             #f8f8f8;
+      --surface:        #ffffff;
+      --surface-2:      #f0f0f0;
+      --surface-3:      #e8e8e8;
+      --accent:         #266BB0;
+      --accent-glow:    rgba(38,107,176,0.22);
+      --accent-dim:     rgba(38,107,176,0.10);
+      --text:           #1a1a1a;
+      --text-muted:     #666666;
+      --text-dim:       #aaaaaa;
+      --border:         rgba(38,107,176,0.13);
+      --border-strong:  rgba(38,107,176,0.32);
+      --success:        #5CC8A0;
+      --warning:        #F5B731;
+      --danger:         #E05555;
+      --font:           'Sora', sans-serif;
+      --mono:           'IBM Plex Mono', monospace;
+      --hdr:            64px;
+      --tnav:           50px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.65;
+      min-height: 100vh;
+    }
+
+    /* ── Disclaimer ── */
+    .disclaimer {
+      background: rgba(245,183,49,0.07);
+      border-bottom: 1px solid rgba(245,183,49,0.18);
+      padding: 9px 1.5rem;
+      text-align: center;
+      font-size: 12px;
+      color: var(--warning);
+    }
+    .disclaimer a { color: var(--warning); text-decoration: underline; }
+
+    /* ── Header ── */
+    .hdr {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      height: var(--hdr);
+      padding: 0 2rem;
+    }
+    .hdr-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .hdr-brand { display: flex; align-items: center; gap: 11px; }
+    .hdr-logo {
+      width: 34px; height: 34px;
+      flex-shrink: 0;
+      object-fit: contain;
+    }
+    .hdr-name { font-weight: 700; font-size: 14px; letter-spacing: -0.01em; }
+    .hdr-dept { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+    .hdr-badge {
+      background: var(--accent-dim);
+      border: 1px solid var(--border-strong);
+      color: var(--accent);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 4.5rem 2rem 4rem;
+      text-align: center;
+      background: linear-gradient(160deg, var(--bg) 0%, var(--surface-2) 60%, var(--bg) 100%);
+      border-bottom: 1px solid var(--border);
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(38,107,176,0.07) 0%, transparent 70%);
+      pointer-events: none; /* Ensure this doesn't block interactions */
+    }
+    .hero-eye {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .hero-h1 {
+      font-size: clamp(2.2rem, 5.5vw, 3.8rem);
+      font-weight: 800;
+      letter-spacing: -0.035em; /* Keep tight kerning for headings */
+      line-height: 1.05;
+      margin-bottom: 18px;
+    }
+    .hero-h1 em { color: var(--accent); font-style: normal; }
+    .hero-sub {
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--text-muted);
+      max-width: 600px; /* Slightly wider for better readability */
+      margin: 0 auto 28px;
+      line-height: 1.7;
+    }
+    .hero-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--accent-dim);
+      border: 1px solid var(--border-strong);
+      border-radius: 24px;
+      padding: 8px 18px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--accent);
+    }
+
+    /* ── Tab nav ── */
+    .tnav {
+      position: sticky;
+      top: var(--hdr);
+      z-index: 90; /* Adjusted z-index to be below header but above content */
+      background: rgba(255,255,255,0.97);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+    }
+    .tnav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: center;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tnav-inner::-webkit-scrollbar { display: none; }
+    .tbtn {
+      padding: 14px 18px;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      border-bottom: 2px solid transparent;
+      transition: color .18s, border-color .18s;
+    }
+    .tbtn:hover { color: var(--text); }
+    .tbtn.on { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; } /* Emphasize active tab */
+
+    /* ── Content wrapper ── */
+    .page { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
+
+    /* ── Section header ── */
+    .sec-eye { font-family: var(--mono); font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+    .sec-h2 { font-size: 22px; font-weight: 800; letter-spacing: -.025em; color: var(--text); }
+    .sec-sub { font-size: 13px; color: var(--text-muted); margin-top: 5px; }
+    .sec-hdr { margin-bottom: 24px; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface); /* Keep surface variable for card background */
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px;
+      transition: border-color .2s;
+    }
+    .card:hover { border-color: var(--border-strong); }
+
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .grid3 { display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap: 16px; }
+
+    .card-ico { font-size: 22px; margin-bottom: 12px; color: var(--text-primary); } /* Ensure icon color is visible */
+    .card-ttl { font-size: 14px; font-weight: 700; margin-bottom: 7px; }
+    .card-txt { font-size: 12.5px; color: var(--text-muted); line-height: 1.65; }
+
+    /* ── Tags / pills ── */
+    .pill {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 10px;
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      margin-top: 10px;
+    }
+    .pill-new  { background: rgba(92,200,160,0.1); color: var(--success); border: 1px solid rgba(92,200,160,0.28); }
+    .pill-chg  { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--border-strong); }
+    .pill-gone { background: rgba(224,85,85,0.1); color: var(--danger); border: 1px solid rgba(224,85,85,0.25); }
+    .pill-warn { background: rgba(245,183,49,0.1); color: var(--warning); border: 1px solid rgba(245,183,49,0.25); }
+    .pill-sm   { margin-top: 0; font-size: 10px; }
+
+    /* ── Alerts ── */
+    .alert { padding: 12px 16px; border-radius: 9px; font-size: 12.5px; line-height: 1.6; display: flex; gap: 9px; }
+    .alert strong { font-weight: 700; }
+    .alert-info    { background: var(--accent-dim); border: 1px solid var(--border-strong); color: var(--accent); } /* Keep blue for info */
+    .alert-warn    { background: rgba(245,183,49,0.07); border: 1px solid rgba(245,183,49,0.2); color: var(--warning); }
+    .alert-danger  { background: rgba(224,85,85,0.07); border: 1px solid rgba(224,85,85,0.2); color: var(--danger); }
+    .alert-success { background: rgba(92,200,160,0.07); border: 1px solid rgba(92,200,160,0.22); color: var(--success); }
+
+    /* ── Divider ── */
+    .div { height: 1px; background: var(--border); margin: 28px 0; }
+
+    /* ── Tables ── */
+    .tbl-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { background: var(--surface-2); padding: 10px 14px; text-align: left; font-family: var(--mono); font-size: 10px; letter-spacing: .07em; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border); } /* Keep surface-2 for header background */
+    td { padding: 11px 14px; border-bottom: 1px solid var(--border); color: var(--text); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(38,107,176,.03); }
+    .tm { font-family: var(--mono); }
+    .ta { font-family: var(--mono); color: var(--accent); font-weight: 600; }
+    .tdim { color: var(--text-dim); text-decoration: line-through; font-family: var(--mono); }
+    .tred { color: var(--danger); }
+    .tgrn { color: var(--success); }
+    .tmut { color: var(--text-muted); }
+
+    /* ── Timeline ── */
+    .tl { position: relative; padding-left: 22px; }
+    .tl::before { content:''; position: absolute; left:6px; top:8px; bottom:8px; width:1px; background: var(--border); }
+    .tl-item { position: relative; margin-bottom: 22px; color: var(--text); } /* Ensure text color is correct */
+    .tl-item:last-child { margin-bottom: 0; }
+    .tl-item::before { content:''; position: absolute; left:-19px; top:6px; width:9px; height:9px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); }
+    .tl-date { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; color: var(--accent); text-transform: uppercase; margin-bottom: 3px; }
+    .tl-ttl { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+    .tl-txt { font-size: 12.5px; color: var(--text-muted); }
+
+    /* ── Calculator ── */
+    .calc-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+    @media(max-width:768px){ .calc-layout { grid-template-columns: 1fr; } }
+
+    .calc-panel {
+      background: var(--surface); /* Keep surface variable */
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 26px;
+    }
+    .calc-result {
+      background: var(--surface); /* Keep surface variable */
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      padding: 26px;
+    }
+
+    .flabel {
+      display: block;
+      font-size: 10.5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-muted);
+      margin-bottom: 9px;
+    }
+    .fgroup { margin-bottom: 20px; }
+
+    .rbtn {
+      padding: 8px 15px;
+      background: var(--surface-2); /* Keep surface-2 for radio buttons */
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--font);
+      font-size: 12.5px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all .15s;
+      font-weight: 500;
+    }
+    .rbtn:hover { border-color: var(--accent); color: var(--text); }
+    .rbtn.on { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
+      height: 4px;
+    }
+    .range-lbl { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10px; color: var(--text-dim); margin-top: 5px; }
+
+    /* ── Big SOR display ── */
+    .sor-big {
+      text-align: center;
+      padding: 20px;
+      background: var(--accent-dim);
+      border: 1px solid var(--border-strong); /* Keep blue accent for this box */
+      border-radius: 10px;
+      margin-bottom: 18px;
+    }
+    .sor-big-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+    .sor-big-val { font-size: 3.2rem; font-weight: 800; letter-spacing: -.05em; color: var(--accent); line-height: 1; }
+    .sor-big-hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    /* ── Bar ── */
+    .bar-wrap { margin-bottom: 18px; }
+    .bar-row { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--text-muted); margin-bottom: 6px; }
+    .bar-track { height: 7px; background: var(--surface-3); border-radius: 4px; overflow: hidden; } /* Keep surface-3 for bar track */
+    .bar-fill { height: 100%; border-radius: 4px; transition: width .35s ease; }
+
+    /* ── Amount boxes ── */
+    .amt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 18px; }
+    .amt-box { background: var(--surface-2); border: 1px solid var(--border); border-radius: 9px; padding: 13px; }
+    .amt-lbl { font-family: var(--mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); margin-bottom: 4px; }
+    .amt-val { font-family: var(--mono); font-size: 18px; font-weight: 600; color: var(--text); }
+    .amt-prev { font-size: 10px; color: var(--text-dim); text-decoration: line-through; margin-top: 2px; font-family: var(--mono); } /* Keep text-dim for strikethrough */
+    .amt-box.hi { background: var(--accent-dim); border-color: var(--border-strong); }
+    .amt-box.hi .amt-val { color: var(--accent); font-size: 21px; }
+
+    /* ── Breakdown ── */
+    .bkdn { background: var(--surface-2); border: 1px solid var(--border); border-radius: 9px; padding: 15px; }
+    .bkdn-ttl { font-family: var(--mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); margin-bottom: 10px; }
+    .bkdn-row { display: flex; justify-content: space-between; font-size: 12px; padding: 6px 0; border-bottom: 1px solid var(--border); }
+    .bkdn-row:last-child { border-bottom: none; }
+    .bkdn-k { color: var(--text-muted); }
+    .bkdn-v { font-family: var(--mono); color: var(--text); font-weight: 500; }
+    .bkdn-v.a { color: var(--accent); }
+
+    /* ── Compare boxes ── */
+    .cmp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media(max-width:600px){ .cmp-grid { grid-template-columns: 1fr; } }
+    .cmp-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+    .cmp-box.red { border-color: rgba(224,85,85,.28); } /* Keep red border for comparison */
+    .cmp-box.grn { border-color: rgba(92,200,160,.28); }
+    .cmp-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 10px; }
+    .cmp-box.red .cmp-lbl { color: var(--danger); }
+    .cmp-box.grn .cmp-lbl { color: var(--success); }
+
+    /* ── FAQ ── */
+    .faq-item { border: 1px solid var(--border); border-radius: 10px; margin-bottom: 9px; overflow: hidden; transition: border-color .2s; }
+    .faq-item.open { border-color: var(--border-strong); }
+    .faq-q { padding: 16px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: var(--surface); font-size: 13.5px; font-weight: 600; user-select: none; transition: background .15s; color: var(--text); } /* Ensure text color is correct */
+    .faq-q:hover { background: var(--surface-2); }
+    .faq-chv { font-size: 18px; color: var(--accent); transition: transform .2s; flex-shrink:0; margin-left: 10px; line-height:1; }
+    .faq-chv.open { transform: rotate(180deg); }
+    .faq-a { padding: 15px 20px; font-size: 13px; color: var(--text-muted); line-height: 1.7; background: var(--surface-2); border-top: 1px solid var(--border); }
+
+    /* ── Plan card ── */
+    .plan-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px; }
+    .plan-card.hi { border-color: var(--border-strong); } /* Keep blue accent for highlighted plan card */
+    .plan-eye { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+    .plan-card.hi .plan-eye { color: var(--accent); }
+    .plan-ttl { font-size: 18px; font-weight: 800; letter-spacing: -.02em; margin-bottom: 10px; }
+    .plan-desc { font-size: 12.5px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.65; }
+    .plan-row { display: flex; justify-content: space-between; font-size: 12px; padding: 6px 0; border-bottom: 1px solid var(--border); }
+    .plan-row:last-child { border-bottom: none; }
+    .plan-k { color: var(--text-muted); }
+    .plan-v { font-family: var(--mono); color: var(--text); }
+
+    /* ── Footer ── */
+    .footer { background: var(--surface); border-top: 1px solid var(--border); padding: 24px 2rem; text-align: center; font-size: 12px; color: var(--text-muted); }
+    .footer a { color: var(--accent); text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+
+    /* ── Utils ── */
+    .mb1 { margin-bottom: 6px; }
+    .mb2 { margin-bottom: 12px; }
+    .mb3 { margin-bottom: 18px; }
+    .mb4 { margin-bottom: 24px; }
+    .mb5 { margin-bottom: 32px; }
+    .mt2 { margin-top: 12px; }
+    .mt3 { margin-top: 18px; }
+    .mt4 { margin-top: 24px; }
+    .flex { display: flex; }
+    .gap2 { gap: 8px; }
+    .gap3 { gap: 12px; }
+    .wrap { flex-wrap: wrap; }
+    .acc { color: var(--accent); }
+    .red { color: var(--danger); }
+    .grn { color: var(--success); }
+    .yel { color: var(--warning); }
+    .mut { color: var(--text-muted); }
+    .bold { font-weight: 700; }
+    .mono { font-family: var(--mono); }
+    .f12 { font-size: 12px; }
+    .f13 { font-size: 13px; color: var(--text); } /* Ensure text color is correct */
+    .center { text-align: center; }
+    .full2 { grid-column: span 2; }
+
+    @media(max-width:600px){
+      .grid2 { grid-template-columns: 1fr; }
+      .cmp-grid { grid-template-columns: 1fr; }
+      .hero { padding: 3rem 1.5rem; }
+      .page { padding: 2rem 1.25rem 3rem; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    // ─── Data constants ────────────────────────────────────────────────────────
+
+    const UG_DEP = [
+      { label: '0–31 Credits', sub: 3500, unsub: 2000 },
+      { label: '32–63 Credits', sub: 4500, unsub: 2000 },
+      { label: '64+ Credits',  sub: 5500, unsub: 2000 },
+    ];
+    const UG_IND = [
+      { label: '0–31 Credits', sub: 3500, unsub: 6000 },
+      { label: '32–63 Credits', sub: 4500, unsub: 6000 },
+      { label: '64+ Credits',  sub: 5500, unsub: 7000 },
+    ];
+    const GRAD_LIMIT = { sub: 0, unsub: 20500 };
+
+    // Full-time credits per full academic year (Fall + Spring)
+    const FT = { ug: 24, grad: 18 };
+    // Half-time minimum per term
+    const HT = { ug: 6, grad: 5 };
+
+    const FAQ = [
+      { q: 'What is the Schedule of Reductions (SOR)?',
+        a: 'SOR is a new rule that prorates your Federal Direct Loan based on credits enrolled. Full-time enrollment earns 100% of your annual loan limit. Every credit below full-time reduces your eligibility proportionally. SOR applies starting July 1, 2026 for loans on a 2026–27 ISIR or later.' },
+      { q: 'How is the SOR percentage calculated?',
+        a: 'SOR% = (Credits enrolled for the year) ÷ (Credits required for full-time in a year) × 100, rounded up to the nearest whole percent. For undergraduates at Stockton, full-time is 24 credits per year (12/semester). For graduate students it is 18 credits per year (9/semester). Example: 15 credits ÷ 24 = 62.5% → rounds up to 63%.' },
+      { q: 'What is the minimum enrollment to receive a loan?',
+        a: 'You must be enrolled at least half-time. For undergraduates that means at least 6 credits per term (Fall/Spring) or 6 credits in summer. For graduate students it is 5 credits in Fall/Spring or 3 credits in summer. Enrollment below half-time means zero loan eligibility.' },
+      { q: 'What happened to the Graduate PLUS Loan?',
+        a: 'The OBBBA eliminates the Grad PLUS Loan for new borrowers beginning July 1, 2026. However, if you were enrolled in your current degree program and received any Direct Loan before July 1, 2026, you may continue borrowing Grad PLUS under an Interim Exception for up to 3 additional academic years or until you complete your program — whichever comes first. Students who lose eligibility should explore Direct Unsubsidized Loans ($20,500/yr), private loans, scholarships, and payment plans.' },
+      { q: 'How has the Parent PLUS Loan changed?',
+        a: 'New borrowers (parents who have not previously borrowed a Parent PLUS Loan) face a federal annual cap of $20,000 per student and a lifetime cap of $65,000. Stockton limits new borrowers to $16,250 per year so parents who borrow for four years can reach the $65,000 lifetime limit without running out early. Parents who already borrowed before July 1, 2026 are covered by an Interim Exception for up to 3 more academic years.' },
+      { q: 'What is the new Repayment Assistance Plan (RAP)?',
+        a: 'RAP is an income-driven repayment plan replacing SAVE and other IDR plans. Your monthly payment equals a percentage of your AGI (1%–10%) divided by 12, minus $50 per dependent (floor of $10/month). If you make full, on-time payments, unpaid interest is subsidized so your balance will never grow. Forgiveness is available after 360 qualifying payments over at least 30 years. RAP payments count toward PSLF.' },
+      { q: 'What is the new Tiered Standard Plan?',
+        a: 'The Tiered Standard Plan sets fixed monthly payments based on your outstanding loan balance. Repayment periods range from 10 years (balance under $25,000) to 25 years (balance $100,000+). Important: payments under the Tiered Standard Plan do NOT count toward Public Service Loan Forgiveness (PSLF).' },
+      { q: 'I am currently on an IDR plan. What happens to me?',
+        a: 'If you have no new loans made on or after July 1, 2026, you may stay on your current plan or switch to RAP. You have until July 1, 2028 to make a selection — if you take no action, you will be automatically moved to RAP. If you later take out a new loan on or after July 1, 2026, your only options for all loans become RAP or the Tiered Standard Plan.' },
+      { q: 'How have Pell Grant rules changed?',
+        a: 'Two new restrictions apply starting July 1, 2026: (1) If your entire Cost of Attendance is already covered by non-federal grants and scholarships, you will not receive a Pell Grant even if you otherwise qualify. (2) If your Student Aid Index (SAI) exceeds $14,970 — which is twice the 2026–27 maximum Pell award of $7,395 — you are ineligible for Pell.' },
+      { q: 'What are the new lifetime borrowing limits?',
+        a: 'A single $257,500 lifetime cap now applies to all federal student loans except Parent PLUS Loans. Within that, graduate students face a $100,000 cap on graduate-only borrowing (previously $138,500 combined), and professional students face a $250,000 cap on professional-study borrowing. These new grad/professional caps do not count undergraduate loans.' },
+      { q: 'If I drop credits after disbursement, does my loan get reduced?',
+        a: 'Drops before disbursement require the loan to be recalculated and reduced. Drops after disbursement do not recapture already-disbursed funds, but the reduction is applied to a future term in the same academic year. If you drop below half-time in a term, your eligibility for that term ends. Always speak with Financial Aid before dropping credits.' },
+      { q: 'Where can I get more help?',
+        a: 'Visit the Stockton Office of Financial Aid at Campus Center Suite 201, call (609) 652-4203, or schedule an appointment at stockton.edu/contactfinaid. For federal guidance, visit studentaid.gov/announcements-events/big-updates.' },
+    ];
+
+    // ─── Helpers ──────────────────────────────────────────────────────────────
+
+    const fmt = n => '$' + Math.round(n).toLocaleString();
+
+    function getLimits(sType, dep, tier) {
+      if (sType === 'grad') return { sub: 0, unsub: 20500 };
+      const table = dep === 'dep' ? UG_DEP : UG_IND;
+      return table[tier];
+    }
+
+    function sorPct(enrolled, ft) {
+      if (enrolled <= 0) return 0;
+      return Math.min(100, Math.ceil((enrolled / ft) * 100));
+    }
+
+    function rapMonthly(agi, deps) {
+      let annual;
+      if (agi <= 10000)       annual = 120;
+      else if (agi <= 20000)  annual = agi * 0.01;
+      else if (agi <= 30000)  annual = agi * 0.02;
+      else if (agi <= 40000)  annual = agi * 0.03;
+      else if (agi <= 50000)  annual = agi * 0.04;
+      else if (agi <= 60000)  annual = agi * 0.05;
+      else if (agi <= 70000)  annual = agi * 0.06;
+      else if (agi <= 80000)  annual = agi * 0.07;
+      else if (agi <= 90000)  annual = agi * 0.08;
+      else if (agi <= 100000) annual = agi * 0.09;
+      else                    annual = agi * 0.10;
+      return Math.max(10, annual / 12 - deps * 50);
+    }
+
+    function rapRate(agi) {
+      if (agi <= 10000) return '$120 flat/yr';
+      if (agi <= 20000) return '1% of AGI';
+      if (agi <= 30000) return '2% of AGI';
+      if (agi <= 40000) return '3% of AGI';
+      if (agi <= 50000) return '4% of AGI';
+      if (agi <= 60000) return '5% of AGI';
+      if (agi <= 70000) return '6% of AGI';
+      if (agi <= 80000) return '7% of AGI';
+      if (agi <= 90000) return '8% of AGI';
+      if (agi <= 100000) return '9% of AGI';
+      return '10% of AGI';
+    }
+
+    // ─── Shared micro-components ───────────────────────────────────────────────
+
+    function RadioGroup({ value, onChange, options }) {
+      return (
+        <div className="flex gap2 wrap">
+          {options.map(([v, l]) => (
+            <button key={v} className={`rbtn ${value === v ? 'on' : ''}`} onClick={() => onChange(v)}>{l}</button>
+          ))}
+        </div>
+      );
+    }
+
+    function Slider({ min, max, step = 1, value, onChange, leftLabel, midLabel, rightLabel }) {
+      return (
+        <>
+          <input type="range" min={min} max={max} step={step} value={value}
+            onChange={e => onChange(Number(e.target.value))} />
+          <div className="range-lbl">
+            <span>{leftLabel}</span>
+            {midLabel && <span>{midLabel}</span>}
+            <span>{rightLabel}</span>
+          </div>
+        </>
+      );
+    }
+
+    // ─── OVERVIEW TAB ─────────────────────────────────────────────────────────
+
+    function OverviewTab() {
+      const changes = [
+        { ico: '📉', ttl: 'Schedule of Reductions (SOR)', pill: ['New', 'new'],
+          txt: 'Starting July 1, 2026, Federal Direct Loans are prorated based on how many credits you enroll in for the year. Full-time = 100% loan eligibility. Part-time = proportionally less.' },
+        { ico: '🚫', ttl: 'Graduate PLUS Loan Eliminated', pill: ['Eliminated', 'gone'],
+          txt: 'New grad students cannot borrow Grad PLUS after July 1, 2026. Students who borrowed before that date qualify for a temporary Interim Exception (up to 3 additional years).' },
+        { ico: '🔢', ttl: 'Parent PLUS New Caps', pill: ['Changed', 'chg'],
+          txt: 'New borrowers: $20,000/year and $65,000 lifetime per child. Stockton limits to $16,250/year to preserve multi-year eligibility. Existing borrowers are temporarily grandfathered.' },
+        { ico: '💳', ttl: 'Two New Repayment Plans', pill: ['New', 'new'],
+          txt: 'RAP (income-based, interest-subsidized) and the Tiered Standard Plan replace older IDR options. Existing borrowers must choose by July 1, 2028 or be auto-placed into RAP.' },
+        { ico: '📊', ttl: 'Graduate Lifetime Loan Limits Reduced', pill: ['Changed', 'chg'],
+          txt: 'Graduate borrowing cap drops from $138,500 to $100,000. Professional students: $250,000. A $257,500 combined lifetime cap applies to all federal loans (excluding Parent PLUS).' },
+        { ico: '🎓', ttl: 'Pell Grant Eligibility Tightened', pill: ['Changed', 'chg'],
+          txt: 'Students whose full COA is covered by non-federal aid lose Pell eligibility. Students with SAI ≥ $14,970 (2× the max $7,395 award for 2026–27) are also ineligible.' },
+        { ico: '⏸', ttl: 'Deferment & Forbearance Restricted', pill: ['Changed', 'chg'],
+          txt: 'Economic hardship and unemployment deferments end July 1, 2027. Forbearance for loans made after July 1, 2027 is capped at 9 months per 2-year period (down from 12 months).' },
+        { ico: '🏛', ttl: 'PSLF & Parent PLUS Separated', pill: ['Changed', 'chg'],
+          txt: 'New Parent PLUS loans (from July 1, 2026) are ineligible for IDR plans and therefore PSLF. Existing borrowers must consolidate into a Direct Loan and enter ICR before July 1, 2028 to preserve PSLF.' },
+      ];
+
+      return (
+        <div>
+          <div className="sec-hdr">
+            <div className="sec-eye">What Changed</div>
+            <div className="sec-h2">OBBBA at a Glance</div>
+            <div className="sec-sub">Every major change affecting Stockton students and families, effective July 1, 2026.</div>
+          </div>
+
+          <div className="grid3 mb5">
+            {changes.map((c,i) => (
+              <div className="card" key={i}>
+                <div className="card-ico">{c.ico}</div>
+                <div className="card-ttl">{c.ttl}</div>
+                <div className="card-txt">{c.txt}</div>
+                <span className={`pill pill-${c.pill[1]}`}>{c.pill[0]}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="div" />
+
+          <div className="sec-hdr">
+            <div className="sec-eye">Key Dates</div>
+            <div className="sec-h2">Important Timeline</div>
+          </div>
+
+          <div className="card">
+            <div className="tl">
+              {[
+                { d: 'July 4, 2025',   ttl: 'OBBBA Signed Into Law',
+                  txt: 'The One Big Beautiful Bill Act becomes federal law. Some provisions take effect immediately.' },
+                { d: 'July 1, 2026',   ttl: 'Major Aid Changes Take Effect',
+                  txt: 'SOR begins for all loans on 26–27 ISIR or later. Grad PLUS eliminated for new borrowers. Parent PLUS caps begin. New repayment plans become available.' },
+                { d: 'July 1, 2027',   ttl: 'Deferment Options Sunset',
+                  txt: 'Economic hardship and unemployment deferments end for new situations. New forbearance caps apply to loans originated after this date.' },
+                { d: 'March 2027',     ttl: 'IBR Interest Subsidy Change',
+                  txt: 'IBR interest subsidy now requires on-time, full payments to apply.' },
+                { d: 'July 1, 2028',   ttl: 'IDR Selection Deadline',
+                  txt: 'Existing borrowers must choose Standard, IBR, or RAP by this date or be automatically moved into RAP.' },
+              ].map((item,i) => (
+                <div className="tl-item" key={i}>
+                  <div className="tl-date">{item.d}</div>
+                  <div className="tl-ttl">{item.ttl}</div>
+                  <div className="tl-txt">{item.txt}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ─── SOR CALCULATOR TAB ───────────────────────────────────────────────────
+
+    function SORTab() {
+      const [sType,     setSType]     = useState('ug');
+      const [dep,       setDep]       = useState('dep');
+      const [tier,      setTier]      = useState(0);
+      const [yearCr,    setYearCr]    = useState(18);
+
+      const ft      = FT[sType];
+      const ht      = HT[sType];
+      const limits  = getLimits(sType, dep, tier);
+      const total   = limits.sub + limits.unsub;
+      const pct     = sorPct(yearCr, ft);
+      const isHT    = yearCr >= ht;
+      const isFT    = yearCr >= ft;
+      const sorSub  = Math.round(limits.sub   * pct / 100);
+      const sorUnsub= Math.round(limits.unsub * pct / 100);
+      const sorTot  = sorSub + sorUnsub;
+
+      const barColor = !isHT ? 'var(--danger)' : isFT ? 'var(--success)' : 'var(--accent)';
+      const barPct   = Math.min(100, (yearCr / ft) * 100);
+
+      return (
+        <div>
+          <div className="sec-hdr">
+            <div className="sec-eye">Interactive Tool</div>
+            <div className="sec-h2">SOR Loan Calculator</div>
+            <div className="sec-sub">Estimate your Federal Direct Loan eligibility under the new Schedule of Reductions rule (effective July 1, 2026).</div>
+          </div>
+
+          <div className="calc-layout">
+
+            {/* ── Inputs ── */}
+            <div className="calc-panel">
+              <div className="fgroup">
+                <label className="flabel">Student Type</label>
+                <RadioGroup value={sType} onChange={v => { setSType(v); setYearCr(v === 'ug' ? 18 : 13); }}
+                  options={[['ug','Undergraduate'],['grad','Graduate']]} />
+              </div>
+
+              {sType === 'ug' && (
+                <div className="fgroup">
+                  <label className="flabel">Dependency Status</label>
+                  <RadioGroup value={dep} onChange={setDep}
+                    options={[['dep','Dependent'],['ind','Independent']]} />
+                </div>
+              )}
+
+              {sType === 'ug' && (
+                <div className="fgroup">
+                  <label className="flabel">Credits Already Earned</label>
+                  <RadioGroup value={tier} onChange={v => setTier(Number(v))}
+                    options={[[0,'0–31 Credits'],[1,'32–63 Credits'],[2,'64+ Credits']]} />
+                </div>
+              )}
+
+              <div className="fgroup">
+                <label className="flabel">
+                  Total Credits Enrolled — Full Academic Year
+                  &nbsp;<span style={{fontFamily:'var(--mono)',color:'var(--accent)',fontSize:14,fontWeight:600,textTransform:'none',letterSpacing:0}}>{yearCr} cr</span>
+                </label>
+                <Slider
+                  min={0} max={sType === 'ug' ? 36 : 27} value={yearCr}
+                  onChange={setYearCr}
+                  leftLabel="0"
+                  midLabel={`Half-time ≥${ht}`}
+                  rightLabel={`${sType==='ug'?36:27} max`}
+                />
+              </div>
+
+              <div className="div" style={{margin:'18px 0'}} />
+
+              <div style={{fontSize:12, color:'var(--text-muted)', lineHeight:1.75}}>
+                <div><span className="acc bold">Full-time</span> = {ft} credits/year — earns 100% annual loan limit</div>
+                <div><span className="yel bold">Half-time minimum</span> = {ht} credits per term — below this, no loan eligibility</div>
+                <div className="mt2 f12 mut">SOR is computed across the <em>entire academic year</em>, not per individual term.</div>
+              </div>
+            </div>
+
+            {/* ── Results ── */}
+            <div className="calc-result">
+              {yearCr === 0 && (
+                <div className="alert alert-info mb3">👆 Adjust the credits slider to see your estimated eligibility.</div>
+              )}
+              {yearCr > 0 && !isHT && (
+                <div className="alert alert-danger mb3">⛔ <strong>Below half-time.</strong> No Federal Direct Loan eligibility.</div>
+              )}
+              {isHT && isFT && (
+                <div className="alert alert-success mb3">✅ <strong>Full-time enrollment.</strong> You receive 100% of your annual limit.</div>
+              )}
+              {isHT && !isFT && yearCr > 0 && (
+                <div className="alert alert-warn mb3">⚠️ <strong>Part-time enrollment.</strong> Your loan is prorated by the SOR percentage.</div>
+              )}
+
+              <div className="sor-big">
+                <div className="sor-big-lbl">Your SOR Percentage</div>
+                <div className="sor-big-val">{isHT ? pct : 0}%</div>
+                <div className="sor-big-hint">{yearCr} ÷ {ft} × 100{pct < 100 && pct > 0 ? ' (rounded up)' : ''}</div>
+              </div>
+
+              <div className="bar-wrap">
+                <div className="bar-row">
+                  <span>Enrollment Intensity</span>
+                  <span className="mono">{yearCr} / {ft} credits</span>
+                </div>
+                <div className="bar-track">
+                  <div className="bar-fill" style={{ width: barPct + '%', background: barColor }} />
+                </div>
+              </div>
+
+              {isHT && yearCr > 0 && (
+                <>
+                  <div className="amt-grid">
+                    {limits.sub > 0 && (
+                      <div className="amt-box">
+                        <div className="amt-lbl">Subsidized</div>
+                        <div className="amt-val">{fmt(sorSub)} <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-muted)' }}>({fmt(sorSub / 2)}/sem)</span></div>
+                        <div className="amt-prev">{fmt(limits.sub)} full</div>
+                      </div>
+                    )}
+                    <div className="amt-box" style={limits.sub === 0 ? {gridColumn:'span 2'} : {}}>
+                      <div className="amt-lbl">Unsubsidized</div>
+                      <div className="amt-val">{fmt(sorUnsub)} <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-muted)' }}>({fmt(sorUnsub / 2)}/sem)</span></div>
+                      <div className="amt-prev">{fmt(limits.unsub)} full</div>
+                    </div>
+                    <div className={`amt-box hi ${limits.sub > 0 ? 'full2' : ''}`}>
+                      <div className="amt-lbl">Total Annual Loan / Total Semester Amount</div>
+                      <div className="amt-val">{fmt(sorTot)} <span style={{ fontSize: '15px', fontWeight: 500, opacity: 0.8 }}>({fmt(sorTot / 2)}/sem)</span></div>
+                      <div className="amt-prev">{fmt(total)} at full-time</div>
+                    </div>
+                  </div>
+
+                  <div className="bkdn">
+                    <div className="bkdn-ttl">Step-by-Step Calculation</div>
+                    <div className="bkdn-row"><span className="bkdn-k">Credits enrolled (year)</span><span className="bkdn-v">{yearCr}</span></div>
+                    <div className="bkdn-row"><span className="bkdn-k">FT credits required</span><span className="bkdn-v">{ft}</span></div>
+                    <div className="bkdn-row"><span className="bkdn-k">SOR % (rounded up)</span><span className="bkdn-v a">{pct}%</span></div>
+                    <div className="bkdn-row"><span className="bkdn-k">Annual limit (full-time)</span><span className="bkdn-v">{fmt(total)}</span></div>
+                    <div className="bkdn-row"><span className="bkdn-k">Prorated total</span><span className="bkdn-v a">{fmt(sorTot)}</span></div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className="div" />
+          <div className="alert alert-info">
+            💡 <strong>Important:</strong> Dropping credits <em>before</em> disbursement requires a loan recalculation. Dropping after disbursement shifts the reduction to a future term. Always contact Financial Aid before making enrollment changes.
+          </div>
+        </div>
+      );
+    }
+
+    // ─── REPAYMENT TAB ────────────────────────────────────────────────────────
+
+    function RepaymentTab() {
+      const [agi,  setAgi]  = useState(40000);
+      const [deps, setDeps] = useState(0);
+
+      const monthly = rapMonthly(agi, deps);
+      const rate    = rapRate(agi);
+      const annBase = agi <= 10000 ? 120 : agi * parseFloat(rate) / 100;
+      const rawMo   = (agi <= 10000 ? 120 : annBase) / 12;
+
+      return (
+        <div>
+          <div className="sec-hdr">
+            <div className="sec-eye">Loan Repayment</div>
+            <div className="sec-h2">New Repayment Plans</div>
+            <div className="sec-sub">Two plans replace most existing IDR options starting July 1, 2026.</div>
+          </div>
+
+          <div className="grid2 mb5">
+            <div className="plan-card hi">
+              <div className="plan-eye">New Option 1 · Income-Based</div>
+              <div className="plan-ttl">Repayment Assistance Plan <span className="acc">(RAP)</span></div>
+              <div className="plan-desc">Monthly payment based on your income, not your loan balance. Unpaid interest is subsidized — your balance won't grow if you make on-time, full payments.</div>
+              {[
+                ['Payment basis',   'AGI percentage ÷ 12'],
+                ['Interest subsidy','Yes — unpaid interest forgiven'],
+                ['Loan discharge',  '360 payments / 30 years'],
+                ['PSLF eligible',   'Yes ✓'],
+                ['Parent PLUS',     'Not eligible ✗'],
+                ['Auto-enrolled if','No plan chosen by Jul 1, 2028'],
+              ].map(([k,v]) => (
+                <div className="plan-row" key={k}>
+                  <span className="plan-k">{k}</span>
+                  <span className="plan-v" style={v.includes('✗') ? {color:'var(--danger)'} : v.includes('✓') ? {color:'var(--success)'} : {}}>{v}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="plan-card">
+              <div className="plan-eye">New Option 2 · Fixed Payment</div>
+              <div className="plan-ttl">Tiered Standard Plan</div>
+              <div className="plan-desc">Fixed monthly payments based on your loan balance. Repayment period scales with how much you owe — 10 to 25 years. No PSLF eligibility.</div>
+              {[
+                ['Payment basis',   'Loan balance + interest rate'],
+                ['Interest subsidy','None'],
+                ['Loan discharge',  'After full repayment only'],
+                ['PSLF eligible',   'No ✗'],
+                ['Parent PLUS',     'Eligible (only plan for Parent PLUS)'],
+                ['Default if',      'No plan chosen + new loan ≥ Jul 1 2026'],
+              ].map(([k,v]) => (
+                <div className="plan-row" key={k}>
+                  <span className="plan-k">{k}</span>
+                  <span className="plan-v" style={v.includes('✗') ? {color:'var(--danger)'} : {}}>{v}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ── RAP Estimator ── */}
+          <div className="sec-hdr">
+            <div className="sec-eye">Estimator Tool</div>
+            <div className="sec-h2">RAP Monthly Payment Estimator</div>
+            <div className="sec-sub">See your estimated monthly payment under the Repayment Assistance Plan.</div>
+          </div>
+
+          <div className="calc-layout mb5">
+            <div className="calc-panel">
+              <div className="fgroup">
+                <label className="flabel">
+                  Annual Adjusted Gross Income (AGI)
+                  &nbsp;<span style={{fontFamily:'var(--mono)',color:'var(--accent)',fontSize:14,textTransform:'none',letterSpacing:0}}>{fmt(agi)}</span>
+                </label>
+                <Slider min={0} max={150000} step={1000} value={agi} onChange={setAgi}
+                  leftLabel="$0" midLabel="$75K" rightLabel="$150K" />
+              </div>
+
+              <div className="fgroup">
+                <label className="flabel">
+                  Number of Dependents
+                  &nbsp;<span style={{fontFamily:'var(--mono)',color:'var(--accent)',fontSize:14,textTransform:'none',letterSpacing:0}}>{deps}</span>
+                </label>
+                <Slider min={0} max={8} step={1} value={deps} onChange={setDeps}
+                  leftLabel="0" midLabel="4" rightLabel="8" />
+              </div>
+
+              <div className="f12 mut mt3">
+                Each dependent reduces your monthly payment by $50. Minimum payment is always $10/month.
+              </div>
+            </div>
+
+            <div className="calc-result">
+              <div className="sor-big">
+                <div className="sor-big-lbl">Estimated Monthly Payment</div>
+                <div className="sor-big-val">{fmt(Math.round(monthly))}</div>
+                <div className="sor-big-hint">per month under RAP</div>
+              </div>
+
+              <div className="bkdn">
+                <div className="bkdn-ttl">Calculation Breakdown</div>
+                <div className="bkdn-row"><span className="bkdn-k">Annual AGI</span><span className="bkdn-v">{fmt(agi)}</span></div>
+                <div className="bkdn-row"><span className="bkdn-k">Payment rate</span><span className="bkdn-v a">{rate}</span></div>
+                <div className="bkdn-row"><span className="bkdn-k">Annual base</span><span className="bkdn-v">{fmt(agi <= 10000 ? 120 : agi * parseFloat(rate)/100)}</span></div>
+                <div className="bkdn-row"><span className="bkdn-k">Monthly (÷ 12)</span><span className="bkdn-v">{fmt(rawMo)}</span></div>
+                <div className="bkdn-row"><span className="bkdn-k">Dependent deduction</span><span className="bkdn-v">− {fmt(deps * 50)}</span></div>
+                <div className="bkdn-row"><span className="bkdn-k acc">Estimated payment</span><span className="bkdn-v a">{fmt(Math.round(monthly))}</span></div>
+              </div>
+
+              <div className="alert alert-info mt3 f12">
+                Estimate only. Actual RAP payments are based on IRS-verified income and recalculated annually. Minimum is always $10/month.
+              </div>
+            </div>
+          </div>
+
+          {/* ── Tiered Standard periods ── */}
+          <div className="sec-hdr">
+            <div className="sec-eye">Tiered Standard Plan</div>
+            <div className="sec-h2">Maximum Repayment Periods</div>
+          </div>
+          <div className="card mb5">
+            <div className="tbl-wrap">
+              <table>
+                <thead><tr><th>Outstanding Principal Balance</th><th>Max Repayment Period</th></tr></thead>
+                <tbody>
+                  <tr><td>Less than $25,000</td><td className="ta">10 years</td></tr>
+                  <tr><td>$25,000 – $49,999</td><td className="ta">15 years</td></tr>
+                  <tr><td>$50,000 – $99,999</td><td className="ta">20 years</td></tr>
+                  <tr><td>$100,000 or more</td><td className="ta">25 years</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* ── RAP rate table ── */}
+          <div className="sec-hdr">
+            <div className="sec-eye">RAP Reference</div>
+            <div className="sec-h2">Payment Rate by Income</div>
+          </div>
+          <div className="card">
+            <div className="tbl-wrap">
+              <table>
+                <thead><tr><th>Total Adjusted Gross Income</th><th>Base Rate</th><th>Est. Monthly (No Dependents)</th></tr></thead>
+                <tbody>
+                  {[
+                    ['$0 – $10,000',       '$120 flat/yr',  '$10.00'],
+                    ['$10,001 – $20,000',  '1% of AGI',     '$10.00 – $16.67'],
+                    ['$20,001 – $30,000',  '2% of AGI',     '$33.34 – $50.00'],
+                    ['$30,001 – $40,000',  '3% of AGI',     '$75.00 – $100.00'],
+                    ['$40,001 – $50,000',  '4% of AGI',     '$133.34 – $166.67'],
+                    ['$50,001 – $60,000',  '5% of AGI',     '$208.34 – $250.00'],
+                    ['$60,001 – $70,000',  '6% of AGI',     '$300.01 – $350.00'],
+                    ['$70,001 – $80,000',  '7% of AGI',     '$408.34 – $466.67'],
+                    ['$80,001 – $90,000',  '8% of AGI',     '$533.34 – $600.00'],
+                    ['$90,001 – $100,000', '9% of AGI',     '$675.01 – $750.00'],
+                    ['More than $100,000', '10% of AGI',    '$833.33+'],
+                  ].map(([range, rate, est]) => (
+                    <tr key={range}>
+                      <td>{range}</td>
+                      <td className="ta">{rate}</td>
+                      <td className="tm">{est}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ─── LOAN LIMITS TAB ──────────────────────────────────────────────────────
+ function LimitsTab() {
+ return (
+ <div>
+ <div className="sec-hdr">
+ <div className="sec-eye">Borrowing Limits</div>
+ <div className="sec-h2">Updated Loan Limits</div>
+ <div className="sec-sub">Annual and lifetime changes effective July 1, 2026.</div>
+ </div>
+
+ {/* UG Annual */}
+ <div className="mb4">
+ <div style={{fontSize:15,fontWeight:700,marginBottom:6}}>
+ Undergraduate Annual Limits <span className="pill pill-sm pill-chg">SOR Prorated Starting Jul 1, 2026</span>
+ </div>
+ <div className="f13 mut mb3">Annual dollar amounts are unchanged — but SOR will prorate them based on your enrollment intensity.</div>
+
+ <div className="grid2">
+ <div className="card">
+ <div style={{fontFamily:'var(--mono)',fontSize:10,letterSpacing:'.1em',textTransform:'uppercase',color:'var(--text-muted)',marginBottom:12}}>Dependent Students</div>
+ <div className="tbl-wrap">
+ <table>
+ <thead><tr><th>Credits Earned</th><th>Subsidized</th><th>Unsubsidized</th><th>Annual Total</th></tr></thead>
+ <tbody>
+ <tr><td>0–31</td><td className="tm">$3,500</td><td className="tm">$2,000</td><td className="ta">$5,500</td></tr>
+ <tr><td>32–63</td><td className="tm">$4,500</td><td className="tm">$2,000</td><td className="ta">$6,500</td></tr>
+ <tr><td>64+</td><td className="tm">$5,500</td><td className="tm">$2,000</td><td className="ta">$7,500</td></tr>
+ </tbody>
+ </table>
+ </div>
+ </div>
+
+ <div className="card">
+ <div style={{fontFamily:'var(--mono)',fontSize:10,letterSpacing:'.1em',textTransform:'uppercase',color:'var(--text-muted)',marginBottom:12}}>Independent Students</div>
+ <div className="tbl-wrap">
+ <table>
+ <thead><tr><th>Credits Earned</th><th>Subsidized</th><th>Unsubsidized</th><th>Annual Total</th></tr></thead>
+ <tbody>
+ <tr><td>0–31</td><td className="tm">$3,500</td><td className="tm">$6,000</td><td className="ta">$9,500</td></tr>
+ <tr><td>32–63</td><td className="tm">$4,500</td><td className="tm">$6,000</td><td className="ta">$10,500</td></tr>
+ <tr><td>64+</td><td className="tm">$5,500</td><td className="tm">$7,000</td><td className="ta">$12,500</td></tr>
+ </tbody>
+ </table>
+ </div>
+ </div>
+ </div>
+ </div>
+
+ {/* UG Lifetime limits (separate table) */}
+ <div className="mb4">
+ <div style={{fontSize:15,fontWeight:700,marginBottom:10}}>
+ Undergraduate Lifetime Limits <span className="pill pill-sm pill-chg">New Lifetime Limits</span>
+ </div>
+ <div className="card">
+ <div className="tbl-wrap">
+ <table>
+ <thead><tr><th>Student Type</th><th>Lifetime Limit</th><th>Notes</th></tr></thead>
+ <tbody>
+ <tr>
+ <td>Dependent Undergraduate</td>
+ <td className="ta">$31,000</td>
+ <td className="tmut">Total Direct Loans (Subsidized + Unsubsidized). Subsidized portion capped at <span className="mono">$23,000</span>.</td>
+ </tr>
+ <tr>
+ <td>Independent Undergraduate</td>
+ <td className="ta">$57,500</td>
+ <td className="tmut">Total Direct Loans (Subsidized + Unsubsidized). Subsidized portion capped at <span className="mono">$23,000</span>.</td>
+ </tr>
+ </tbody>
+ </table>
+ </div>
+ <div className="alert alert-info mt3 f12">These lifetime limits are federal caps across your entire undergraduate borrowing history. Your annual eligibility can still be prorated by SOR based on credits enrolled.</div>
+ </div>
+ </div>
+
+ <div className="div" /> {/* Divider */}
+
+ {/* Grad / Professional */}
+ <div className="mb4">
+ <div style={{fontSize:15,fontWeight:700,marginBottom:10}}>
+ Graduate & Professional Limits <span className="pill pill-sm pill-chg">Lifetime Caps Reduced</span>
+ </div>
+ <div className="card">
+ <div className="tbl-wrap">
+ <table>
+ <thead><tr><th>Student Type</th><th>Annual</th><th>New Lifetime</th><th>Old Lifetime</th></tr></thead>
+ <tbody>
+ <tr>
+ <td>Graduate</td>
+ <td className="ta">$20,500</td>
+ <td className="ta">$100,000</td>
+ <td className="tdim">$138,500</td>
+ </tr>
+ <tr>
+ <td>Professional</td>
+ <td className="ta">$50,000</td>
+ <td className="ta">$250,000</td>
+ <td className="tdim">$138,500</td>
+ </tr>
+ </tbody>
+ </table>
+ </div>
+ <div className="alert alert-warn mt3 f12">⚠️ These new lifetime caps apply only to graduate/professional borrowing and do <strong>not</strong> include undergraduate loans.</div>
+ </div>
+ </div>
+
+ <div className="div" /> {/* Divider */}
+
+ {/* Parent PLUS */}
+ <div className="mb4">
+ <div style={{fontSize:15,fontWeight:700,marginBottom:10}}>
+ Parent PLUS Loan <span className="pill pill-sm pill-chg">New Annual & Lifetime Caps</span>
+ </div>
+ <div className="cmp-grid">
+ <div className="cmp-box red">
+ <div className="cmp-lbl">Before July 1, 2026</div>
+ <div className="f13 mut" style={{lineHeight:1.8}}>
+ <div>Annual limit: <span style={{color:'var(--text)'}}>Up to full COA</span></div>
+ <div>Lifetime limit: <span style={{color:'var(--text)'}}>None (per student)</span></div>
+ <div>No caps for new or existing borrowers</div>
+ </div>
+ </div>
+ <div className="cmp-box grn">
+ <div className="cmp-lbl">After July 1, 2026 — New Borrowers</div>
+ <div className="f13 mut" style={{lineHeight:1.8}}>
+ <div>Federal annual limit: <span style={{color:'var(--text)'}}>$20,000 / year per child</span></div>
+ <div>Stockton annual cap: <span style={{color:'var(--text)'}}>$16,250 / year per child *</span></div>
+ <div>Lifetime limit: <span style={{color:'var(--text)'}}>$65,000 per child</span></div>
+ </div>
+ </div>
+ </div>
+ <div className="f12 mut mt2">* Stockton limits to $16,250/year so parents can borrow across four years and stay within the $65,000 lifetime cap.</div>
+ </div>
+
+ <div className="div" /> {/* Divider */}
+
+ {/* Grad PLUS */}
+ <div className="mb4">
+ <div style={{fontSize:15,fontWeight:700,marginBottom:10}}>
+ Graduate PLUS Loan <span className="pill pill-sm pill-gone">Eliminated</span>
+ </div>
+ <div className="card" style={{borderColor:'rgba(224,85,85,.22)'}}>
+ <div className="f13 mut" style={{lineHeight:1.8}}>
+ <p className="mb2">Eliminated for new borrowers starting July 1, 2026.</p>
+ <p className="mb2"><strong className="grn">Interim Exception:</strong> If you received any Direct Loan for your current degree program before July 1, 2026, you may continue borrowing Grad PLUS for up to 3 additional academic years or until program completion — whichever comes first.</p>
+ <p><strong style={{color:'var(--text)'}}>Alternatives for ineligible students:</strong> Direct Unsubsidized Loans ($20,500/yr), private loans, scholarships, institutional payment plans.</p>
+ </div>
+ </div>
+ </div>
+
+ <div className="div" /> {/* Divider */}
+
+ {/* Lifetime cap */}
+ <div>
+ <div style={{fontSize:15,fontWeight:700,marginBottom:10}}>Combined Lifetime Borrowing Cap</div>
+ <div className="card" style={{borderColor:'var(--border-strong)', textAlign:'center', padding:'36px 24px'}}>
+ <div style={{fontFamily:'var(--mono)',fontSize:10,letterSpacing:'.18em',textTransform:'uppercase',color:'var(--accent)',marginBottom:8}}>New Total Cap · Effective July 1, 2026</div>
+ <div style={{fontSize:'clamp(2.8rem,7vw,4.5rem)',fontWeight:800,color:'var(--accent)',letterSpacing:'-.045em',lineHeight:1}}>$257,500</div>
+ <div className="f13 mut mt2">Combined lifetime limit across all federal student loans <em>(Parent PLUS excluded)</em></div>
+ </div>
+ </div>
+ </div>
+ );
+ }
+// ─── FAQ TAB ──────────────────────────────────────────────────────────────
+
+    function FAQTab() {
+      const [open, setOpen] = useState(null);
+
+      return (
+        <div>
+          <div className="sec-hdr">
+            <div className="sec-eye">Common Questions</div>
+            <div className="sec-h2">Frequently Asked Questions</div>
+            <div className="sec-sub">Answers to the most common questions about OBBBA changes at Stockton University.</div>
+          </div>
+
+          <div className="mb5">
+            {FAQ.map((item, i) => (
+              <div className={`faq-item ${open === i ? 'open' : ''}`} key={i}>
+                <div className="faq-q" onClick={() => setOpen(open === i ? null : i)}>
+                  <span>{item.q}</span>
+                  <span className={`faq-chv ${open === i ? 'open' : ''}`}>›</span>
+                </div>
+                {open === i && <div className="faq-a">{item.a}</div>}
+              </div>
+            ))}
+          </div>
+
+          <div className="card" style={{textAlign:'center', padding:'36px 24px'}}>
+            <div style={{fontSize:18,fontWeight:800,marginBottom:8}}>Still have questions?</div>
+            <div className="f13 mut mb4" style={{maxWidth:460,margin:'0 auto 24px'}}>
+              Our financial aid team is here to help Ospreys navigate these changes.
+              Visit us in Campus Center Suite 201 or reach out below.
+            </div>
+            <div className="flex gap3 wrap" style={{justifyContent:'center'}}>
+              <a href="https://stockton.edu/financial-aid/contact.html" target="_blank"
+                style={{padding:'10px 24px',background:'var(--accent)',color:'var(--bg)',borderRadius:9,fontWeight:700,fontSize:13,textDecoration:'none',display:'inline-block'}}>
+                Contact Financial Aid
+              </a>
+              <a href="https://stockton.edu/financial-aid/obbba-financial-aid-updates.html" target="_blank"
+                style={{padding:'10px 24px',background:'var(--accent-dim)',color:'var(--accent)',border:'1px solid var(--border-strong)',borderRadius:9,fontWeight:700,fontSize:13,textDecoration:'none',display:'inline-block'}}>
+                Official OBBBA Page ↗
+              </a>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ─── APP ROOT ─────────────────────────────────────────────────────────────
+
+    function App() {
+      const [tab, setTab] = useState('overview');
+
+      const TABS = [
+        { id: 'overview',   label: '📋 Overview' },
+        { id: 'sor',        label: '🧮 SOR Calculator' },
+        { id: 'repayment',  label: '💳 Repayment Plans' },
+        { id: 'limits',     label: '📊 Loan Limits' },
+        { id: 'faq',        label: '❓ FAQ' },
+      ];
+
+      function render() {
+        switch(tab) {
+          case 'overview':  return <OverviewTab />;
+          case 'sor':       return <SORTab />;
+          case 'repayment': return <RepaymentTab />;
+          case 'limits':    return <LimitsTab />;
+          case 'faq':       return <FAQTab />;
+          default:          return <OverviewTab />;
+        }
+      }
+
+      return (
+        <>
+          {/* Disclaimer */}
+          <div className="disclaimer">
+            ⚠️ &nbsp;Information is pending final federal regulations. Stockton monitors this legislation and updates guidance as it becomes available. &nbsp;
+            <a href="https://stockton.edu/financial-aid/obbba-financial-aid-updates.html" target="_blank">View official page ↗</a>
+          </div>
+
+          {/* Sticky header */}
+          <header className="hdr">
+            <div className="hdr-inner">
+              <div className="hdr-brand">
+                <img src="https://stockton.edu/relations/brand-guide/images/athletics-s-logo.png" alt="Stockton Logo" className="hdr-logo" />
+                <div>
+                  <div className="hdr-name">Stockton University</div>
+                  <div className="hdr-dept">Office of Financial Aid</div>
+                </div>
+              </div>
+              <div className="hdr-badge">Effective Jul 1, 2026</div>
+            </div>
+          </header>
+
+          {/* Hero */}
+          <div className="hero">
+            <div className="hero-eye">Federal Student Aid Update</div>
+            <h1 className="hero-h1">One Big Beautiful<br /><em>Bill Act</em></h1>
+            <p className="hero-sub">Major changes to Federal Direct Loans, repayment plans, and Pell Grant eligibility are coming. Use this guide to understand what changes and how you're affected.</p>
+            <div className="hero-chip">
+              <span>⏱</span> Changes Effective July 1, 2026 &nbsp;·&nbsp; Guidance Pending Final Regulations
+            </div>
+          </div>
+
+          {/* Tab nav */}
+          <nav className="tnav">
+            <div className="tnav-inner">
+              {TABS.map(t => (
+                <button key={t.id} className={`tbtn ${tab === t.id ? 'on' : ''}`}
+                  onClick={() => { setTab(t.id); }}>
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </nav>
+
+          {/* Page content */}
+          <main className="page">
+            {render()}
+          </main>
+
+          {/* Footer */}
+          <footer className="footer">
+            <div>Stockton University · Office of Financial Aid · Campus Center Suite 201 · (609) 652-4203</div>
+            <div style={{marginTop:6}}>
+              <a href="https://stockton.edu/financial-aid/obbba-financial-aid-updates.html" target="_blank">Official OBBBA Updates</a>
+              &nbsp;·&nbsp;
+              <a href="https://studentaid.gov/announcements-events/big-updates" target="_blank">studentaid.gov</a>
+              &nbsp;·&nbsp;
+              <a href="https://stockton.edu/financial-aid/contact.html" target="_blank">Contact Us</a>
+            </div>
+            <div style={{marginTop:8,color:'var(--text-dim)',fontSize:11}}>
+              Based on current FSA guidance and pending final regulations. Last updated May 2026.
+              Not a substitute for official financial aid advising.
+            </div>
+          </footer>
+        </>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
