@@ -45,7 +45,7 @@ outline-offset:2px;
 header{
 background:#0069AA;
 color:#FFFFFF;
-padding:28px 32px;
+padding:12px 32px;
 box-shadow:0 2px 8px rgba(0,0,0,.15);
 border-bottom:4px solid #FFC423;
 }
@@ -53,14 +53,25 @@ border-bottom:4px solid #FFC423;
 header .header-inner{
 max-width:1200px;
 margin:0 auto;
+display:flex;
+align-items:center;
 }
 
-header h1{
+/* Stockton Logo - Top Left */
+.stockton-logo img{
+height:56px;
+width:auto;
+max-width:220px;
+margin-right:24px;
+filter: brightness(0) invert(1); /* Makes logo white for blue header bg */
+}
+
+header .header-text h1{
 font-size:34px;
 margin-bottom:6px;
 }
 
-header p{
+header .header-text p{
 color:#E8EFF6;
 font-size:15px;
 }
@@ -189,7 +200,7 @@ color:#444;
 font-style:italic;
 }
 
-/* Announcement banner - shown only when at least one .card has data-new="true" */
+/* Announcement banner */
 .announcement{
 background:#EAF3FA;
 border:2px solid #0069AA;
@@ -197,7 +208,7 @@ border-left:6px solid #0069AA;
 border-radius:8px;
 padding:18px 20px;
 margin-bottom:30px;
-display:none; /* revealed by JS only if new items exist */
+display:none;
 }
 
 .announcement.show{
@@ -230,7 +241,6 @@ text-decoration:underline;
 color:#002A5C;
 }
 
-/* "New" badge shown on any card marked data-new="true" */
 .card{
 position:relative;
 }
@@ -261,6 +271,19 @@ border-top:1px solid #ddd;
 background:white;
 }
 
+.brand-bar{
+background:#0069AA;
+color:white;
+text-align:center;
+padding:12px 20px;
+font-size:12px;
+}
+
+.brand-bar a{
+color:#FFC423;
+text-decoration:underline;
+}
+
 @media(max-width:900px){
 
 .container{
@@ -270,6 +293,20 @@ grid-template-columns:1fr;
 aside{
 border-right:none;
 border-bottom:1px solid #ddd;
+}
+
+.header-inner{
+flex-direction:column;
+align-items:flex-start;
+}
+
+.stockton-logo img{
+height:48px;
+margin-bottom:12px;
+}
+
+header .header-text h1{
+font-size:28px;
 }
 
 }
@@ -284,8 +321,14 @@ border-bottom:1px solid #ddd;
 
 <header>
 <div class="header-inner">
+<!-- Stockton University Logo - Official Brand Asset -->
+<div class="stockton-logo">
+<img src="https://stockton.edu/relations/brand-guide/images/official-stockton-logo-display.png" alt="Stockton University">
+</div>
+<div class="header-text">
 <h1>Financial Aid Toolkit</h1>
 <p>Stockton University Office of Financial Aid</p>
+</div>
 </div>
 </header>
 
@@ -397,9 +440,14 @@ autocomplete="off"
 
 </div>
 
+<div class="brand-bar">
+Stockton University • Financial Aid Office • <a href="https://stockton.edu/financial-aid/">Official Website</a>
+</div>
+
 <footer>
 
-Financial Aid Toolkit • Version 1.1
+Financial Aid Toolkit • Version 1.1<br>
+<em>Per Stockton University Brand Guidelines - Use only approved marks</em>
 
 </footer>
 
@@ -426,25 +474,12 @@ noResults.hidden = visibleCount !== 0;
 
 });
 
-/* ---------------------------------------------------------------
-   ANNOUNCEMENT BANNER (Option 1: manual marker, no build step)
-   ---------------------------------------------------------------
-   How it works:
-   - Any card gets `data-new="true"` when you add it, e.g.:
-       <a class="card tool" data-new="true" href="...">
-   - On page load, this script finds every data-new card and lists
-     it in the banner at the top, plus shows a "New" badge on the
-     card itself.
-   - When a card is no longer "new" (next update cycle), just
-     delete the data-new="true" attribute and the <span class=
-     "new-badge"> from that card. Nothing else to maintain.
-   ------------------------------------------------------------- */
 (function(){
 const banner=document.getElementById("announcement-banner");
 const list=document.getElementById("announcement-list");
 const newCards=document.querySelectorAll('.card[data-new="true"]');
 
-if(newCards.length===0) return; // nothing new, keep banner hidden
+if(newCards.length===0) return;
 
 newCards.forEach(card=>{
 const title=card.querySelector("h3")?.textContent.trim() || "New item";
@@ -458,64 +493,6 @@ list.appendChild(li);
 
 banner.classList.add("show");
 })();
-
-/* ---------------------------------------------------------------
-   OPTION 2 (reference only, not active): GitHub Actions workflow
-   that auto-detects new cards on push and rewrites the banner
-   for you, so you never touch data-new by hand.
-   ---------------------------------------------------------------
-   Since you push index.html directly with no CI/CD, this isn't
-   wired up — but here's what the workflow file would look like
-   if you ever add one at .github/workflows/announce-new-cards.yml:
-
-   ---------------------------------------------------------------
-   name: Announce new toolkit cards
-   on:
-     push:
-       branches: [main]
-       paths: ["index.html"]
-   jobs:
-     detect-new-cards:
-       runs-on: ubuntu-latest
-       steps:
-         - uses: actions/checkout@v4
-           with:
-             fetch-depth: 2   # need previous commit to diff against
-         - name: Diff previous vs current index.html
-           run: |
-             git show HEAD~1:index.html > previous.html || touch previous.html
-             # Extract card hrefs from each version and compare
-             grep -oP '(?<=class="card tool" href=")[^"]+' index.html \
-               | sort > current_cards.txt
-             grep -oP '(?<=class="card tool" href=")[^"]+' previous.html \
-               | sort > previous_cards.txt
-             comm -23 current_cards.txt previous_cards.txt > new_cards.txt
-             cat new_cards.txt
-         - name: Tag new cards with data-new="true"
-           run: |
-             while read -r href; do
-               # naive sed insert; a real version would use a small
-               # Python/Node script for safe HTML parsing
-               sed -i "s#href=\"$href\"#data-new=\"true\" href=\"$href\"#" index.html
-             done < new_cards.txt
-         - name: Commit updated banner
-           run: |
-             git config user.name "github-actions"
-             git config user.email "actions@github.com"
-             git add index.html
-             git commit -m "Auto-flag new cards for announcement banner" || echo "No changes"
-             git push
-   ---------------------------------------------------------------
-   Tradeoffs vs the active Option 1 above:
-   - Pro: you never manually add data-new — push a new card, the
-     banner appears on its own.
-   - Con: needs a real workflow file + testing, uses sed/grep on
-     HTML (fragile vs a proper parser), and you still need to
-     decide when a card stops being "new" (e.g. auto-expire after
-     N days, or a second workflow that clears the tag).
-   - Given you said "no CI/CD," Option 1 (manual data-new marker)
-     is what's live in this file right now.
-   ------------------------------------------------------------- */
 
 </script>
 
