@@ -341,7 +341,7 @@ autocomplete="off"
 
 </a>
 
-<a class="card tool" data-new="true" href="obbba-financial-aid-guide_v5.html">
+<a class="card tool" data-new="true" href="calculators/obbba-financial-aid-guide_v5.html">
 
 <span class="new-badge">New</span>
 <h3>OBBBA Financial Aid Guide</h3>
@@ -354,4 +354,170 @@ autocomplete="off"
 
 </section>
 
-<section class="category" id="grant" aria-labelledby
+<section class="category" id="grant" aria-labelledby="grant-heading">
+
+<h2 id="grant-heading">Grant Calculators</h2>
+
+<div class="grid">
+
+<a class="card tool" data-new="true" href="calculators/summer-2025-aid.html">
+
+<span class="new-badge">New</span>
+<h3>Summer 2025 Aid Calculator</h3>
+
+<p>Estimate grant and aid eligibility for Summer 2025 enrollment.</p>
+
+</a>
+
+</div>
+
+</section>
+
+<section class="category" id="reference" aria-labelledby="reference-heading">
+
+<h2 id="reference-heading">Reference</h2>
+
+<div class="grid">
+
+<a class="card tool" href="resources/policies.html">
+
+<h3>Office Policies</h3>
+
+<p>Internal financial aid references and procedures.</p>
+
+</a>
+
+</div>
+
+</section>
+
+<p id="no-results" class="no-results" hidden>No calculators match your search.</p>
+
+</main>
+
+</div>
+
+<footer>
+
+Financial Aid Toolkit • Version 1.1
+
+</footer>
+
+<script>
+
+const search=document.getElementById("search");
+const noResults=document.getElementById("no-results");
+
+search.addEventListener("keyup",()=>{
+
+const value=search.value.toLowerCase();
+let visibleCount=0;
+
+document.querySelectorAll(".tool").forEach(card=>{
+
+const text=card.innerText.toLowerCase();
+const match=text.includes(value);
+card.style.display=match?"block":"none";
+if(match) visibleCount++;
+
+});
+
+noResults.hidden = visibleCount !== 0;
+
+});
+
+/* ---------------------------------------------------------------
+   ANNOUNCEMENT BANNER (Option 1: manual marker, no build step)
+   ---------------------------------------------------------------
+   How it works:
+   - Any card gets `data-new="true"` when you add it, e.g.:
+       <a class="card tool" data-new="true" href="...">
+   - On page load, this script finds every data-new card and lists
+     it in the banner at the top, plus shows a "New" badge on the
+     card itself.
+   - When a card is no longer "new" (next update cycle), just
+     delete the data-new="true" attribute and the <span class=
+     "new-badge"> from that card. Nothing else to maintain.
+   ------------------------------------------------------------- */
+(function(){
+const banner=document.getElementById("announcement-banner");
+const list=document.getElementById("announcement-list");
+const newCards=document.querySelectorAll('.card[data-new="true"]');
+
+if(newCards.length===0) return; // nothing new, keep banner hidden
+
+newCards.forEach(card=>{
+const title=card.querySelector("h3")?.textContent.trim() || "New item";
+const li=document.createElement("li");
+const link=document.createElement("a");
+link.href=card.getAttribute("href");
+link.textContent=title;
+li.appendChild(link);
+list.appendChild(li);
+});
+
+banner.classList.add("show");
+})();
+
+/* ---------------------------------------------------------------
+   OPTION 2 (reference only, not active): GitHub Actions workflow
+   that auto-detects new cards on push and rewrites the banner
+   for you, so you never touch data-new by hand.
+   ---------------------------------------------------------------
+   Since you push index.html directly with no CI/CD, this isn't
+   wired up — but here's what the workflow file would look like
+   if you ever add one at .github/workflows/announce-new-cards.yml:
+
+   ---------------------------------------------------------------
+   name: Announce new toolkit cards
+   on:
+     push:
+       branches: [main]
+       paths: ["index.html"]
+   jobs:
+     detect-new-cards:
+       runs-on: ubuntu-latest
+       steps:
+         - uses: actions/checkout@v4
+           with:
+             fetch-depth: 2   # need previous commit to diff against
+         - name: Diff previous vs current index.html
+           run: |
+             git show HEAD~1:index.html > previous.html || touch previous.html
+             # Extract card hrefs from each version and compare
+             grep -oP '(?<=class="card tool" href=")[^"]+' index.html \
+               | sort > current_cards.txt
+             grep -oP '(?<=class="card tool" href=")[^"]+' previous.html \
+               | sort > previous_cards.txt
+             comm -23 current_cards.txt previous_cards.txt > new_cards.txt
+             cat new_cards.txt
+         - name: Tag new cards with data-new="true"
+           run: |
+             while read -r href; do
+               # naive sed insert; a real version would use a small
+               # Python/Node script for safe HTML parsing
+               sed -i "s#href=\"$href\"#data-new=\"true\" href=\"$href\"#" index.html
+             done < new_cards.txt
+         - name: Commit updated banner
+           run: |
+             git config user.name "github-actions"
+             git config user.email "actions@github.com"
+             git add index.html
+             git commit -m "Auto-flag new cards for announcement banner" || echo "No changes"
+             git push
+   ---------------------------------------------------------------
+   Tradeoffs vs the active Option 1 above:
+   - Pro: you never manually add data-new — push a new card, the
+     banner appears on its own.
+   - Con: needs a real workflow file + testing, uses sed/grep on
+     HTML (fragile vs a proper parser), and you still need to
+     decide when a card stops being "new" (e.g. auto-expire after
+     N days, or a second workflow that clears the tag).
+   - Given you said "no CI/CD," Option 1 (manual data-new marker)
+     is what's live in this file right now.
+   ------------------------------------------------------------- */
+
+</script>
+
+</body>
+</html>
