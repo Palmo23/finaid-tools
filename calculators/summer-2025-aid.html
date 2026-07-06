@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stockton University — Summer Financial Aid Estimator</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  :root {
+    --bg-color: #f5f5f3;
+    --text-color: #1a1a18;
+    --pill-bg: #E1F5EE;
+    --pill-text: #0F6E56;
+    --step-border: rgba(0,0,0,0.12);
+  }
+
+  body { 
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+    background: var(--bg-color); 
+    min-height: 100vh; 
+    display: flex; 
+    justify-content: center; 
+    padding: 2rem 1rem; 
+    color: var(--text-color); 
+  }
+  
+  .calc-wrap { width: 100%; max-width: 640px; }
+
+  /* FIXED HEADER PILL */
+  .header-pill { 
+    display: flex; 
+    align-items: center; /* Vertically centers image and text together */
+    gap: 8px;             /* Adds clean spacing between logo and text */
+    background: var(--pill-bg); 
+    color: var(--pill-text); 
+    font-size: 12px; 
+    font-weight: 500; 
+    padding: 4px 12px; 
+    border-radius: 20px; 
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;     /* Prevents overflow on very small screens */
+  }
+
+  .header-pill img {
+    width: 36px;         /* Fixed size to match text height better */
+    height: auto;        /* Maintains aspect ratio */
+    display: block;      /* Removes default vertical margin/padding in inline elements */
+    flex-shrink: 0;      /* Prevents logo from squishing if content expands */
+  }
+
+  .header-pill-text {
+    line-height: 1.25;   /* Ensures text doesn't wrap awkwardly below the logo line */
+  }
+
+  h2 { font-size: 22px; font-weight: 500; color: var(--text-color); margin-bottom: 0.25rem; }
+  .sub { font-size: 14px; color: #666; margin-bottom: 1.75rem; }
+
+  /* Step Styling */
+  .step { background: #fff; border: 0.5px solid var(--step-border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 12px; }
+  
+  .step-label { font-size: 12px; font-weight: 500; color: #1D9E75; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 8px; }
+  .step-title { font-size: 15px; font-weight: 500; color: var(--text-color); margin-bottom: 12px; }
+
+  /* Smooth Reveal Animation for Steps */
+  @keyframes slideDownFade {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  
+  #pell-step, #tag-step, #summary-step {
+    animation: slideDownFade 0.4s ease-out;
+  }
+
+  /* Input Styling */
+  .field-row { display: flex; align-items: center; gap: 12px; }
+  
+  .num-input { 
+    width: 140px; 
+    font-size: 16px; 
+    font-weight: 500; 
+    padding: 8px 12px; 
+    border: 0.5px solid rgba(0,0,0,0.2); 
+    border-radius: 8px; 
+    background: var(--bg-color); 
+    color: var(--text-color);
+  }
+
+  .num-input:focus { outline: none; border-color: #1D9E75; box-shadow: 0 0 0 2px rgba(29,158,117,0.15); }
+  
+  /* Hide number input spinners */
+  .num-input::-webkit-inner-spin-button, 
+  .num-input::-webkit-outer-spin-button { 
+    -webkit-appearance: none; 
+    margin: 0; 
+  }
+  .num-input {
+    -moz-appearance: textfield;
+  }
+
+  .field-note { font-size: 13px; color: #666; }
+
+  /* Badges */
+  .load-badge { 
+    display: inline-block; 
+    font-size: 12px; 
+    font-weight: 500; 
+    padding: 3px 10px; 
+    border-radius: 20px; 
+    margin-top: 8px;
+  }
+
+  .load-ft   { background: var(--pill-bg); color: var(--pill-text); }
+  .load-tqt  { background: #E6F1FB; color: #185FA5; }
+  .load-ht   { background: #FAEEDA; color: #854F0B; }
+  .load-none { background: #FCEBEB; color: #A32D2D; }
+
+  /* Cost Display */
+  .cost-display { display: flex; align-items: baseline; gap: 8px; margin-top: 8px; }
+  .cost-amount { font-size: 28px; font-weight: 500; color: var(--text-color); }
+  .cost-label { font-size: 13px; color: #666; }
+
+  /* Helper Text */
+  .helper-text { font-size: 12px; color: #999; margin-top: 6px; }
+
+  /* Info Box */
+  .info-box { 
+    margin-top: 12px; 
+    padding: 12px; 
+    background: var(--bg-color); 
+    border-radius: 8px; 
+  }
+
+  .info-row { display: flex; justify-content: space-between; font-size: 13px; color: #666; padding: 3px 0; }
+  
+  .info-value-green { font-size: 18px; font-weight: 500; color: #0F6E56; }
+  .info-value-blue  { font-size: 18px; font-weight: 500; color: #185FA5; }
+
+  /* Summary Card */
+  .summary-card { background: var(--bg-color); border-radius: 12px; padding: 1.25rem 1.5rem; margin-top: 4px; }
+  
+  .summary-row { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 0; font-size: 14px; }
+  .summary-label { color: #666; }
+  .summary-value { font-weight: 500; color: var(--text-color); }
+
+  .summary-deduct-green { font-weight: 500; color: #0F6E56; }
+  .summary-deduct-blue  { font-weight: 500; color: #185FA5; }
+
+  .summary-total-row { display: flex; justify-content: space-between; align-items: baseline; padding-top: 10px; margin-top: 6px; border-top: 0.5px solid var(--step-border); }
+  .summary-total-label { font-size: 15px; font-weight: 500; color: var(--text-color); }
+  .summary-total-value { font-size: 24px; font-weight: 500; color: var(--text-color); }
+
+</style>
+</head>
+<body>
+<div class="calc-wrap">
+  <div class="header-pill">
+    <!-- LOGO INTEGRATED HERE -->
+    <img src="https://stockton.edu/relations/brand-guide/images/seal-color.png" alt="Stockton University Seal">
+    
+    <!-- Text Wrapper for Better Spacing Control -->
+    <div class="header-pill-text">
+      <span>Stockton University</span>
+      <span style="font-size: 12px; font-weight: 400;">Summer 2025–26</span>
+    </div>
+  </div>
+
+  <h2>Summer financial aid estimator</h2>
+  <p class="sub">Estimate your summer tuition cost, Pell, and TAG award.</p>
+
+  <div class="step">
+    <div class="step-label">Step 1</div>
+    <div class="step-title">How many credits are you enrolling in?</div>
+    <div class="field-row">
+      <input class="num-input" type="number" inputmode="numeric" id="credits" min="1" max="18" placeholder="0" oninput="update()">
+      <span class="field-note">credits × $512 per credit</span>
+    </div>
+    <div id="load-badge-wrap"></div>
+  </div>
+
+  <div class="step">
+    <div class="step-label">Step 2</div>
+    <div class="step-title">Tuition before financial aid</div>
+    <div class="cost-display">
+      <span class="cost-amount" id="tuition-display">—</span>
+      <span class="cost-label" id="tuition-sub"></span>
+    </div>
+  </div>
+
+  <div class="step" id="pell-step" style="display:none">
+    <div class="step-label">Step 3</div>
+    <div class="step-title">What was the student's full-time Spring Pell amount?</div>
+    <div class="field-row">
+      <span style="font-weight: 500; color: #666; font-size: 16px;">$</span>
+      <input class="num-input" type="number" inputmode="numeric" id="pell-spring" min="0" placeholder="1650" oninput="update()">
+    </div>
+    <p class="helper-text">Enter the full-time (12 credit) Spring disbursement · Summer Pell = Spring amount × (summer credits ÷ 12)</p>
+    <div class="info-box" id="pell-result" style="display:none"></div>
+  </div>
+
+  <div class="step" id="tag-step" style="display:none">
+    <div class="step-label">Step 4</div>
+    <div class="step-title">Enter the student's NJ Expected Income (NJEI)</div>
+    <div class="field-row">
+      <span style="font-weight: 500; color: #666; font-size: 16px;">$</span>
+      <input class="num-input" type="number" inputmode="numeric" id="njei" min="0" max="9999" placeholder="2400" oninput="update()">
+    </div>
+    <p class="helper-text">Found on the HESAA award notice · Must be $7,499 or under to qualify</p>
+    <div class="info-box" id="tag-result" style="display:none"></div>
+  </div>
+
+  <div class="step" id="summary-step" style="display:none">
+    <div class="step-label">Your estimate</div>
+    <div class="summary-card">
+      <div class="summary-row"><span class="summary-label">Tuition (credits × $512)</span><span class="summary-value" id="s-tuition">—</span></div>
+      <div class="summary-row" id="s-pell-row" style="display:none"><span class="summary-label">Summer Pell Grant</span><span class="summary-deduct-blue" id="s-pell">—</span></div>
+      <div class="summary-row" id="s-tag-row" style="display:none"><span class="summary-label">Summer TAG award</span><span class="summary-deduct-green" id="s-tag">—</span></div>
+      <div class="summary-total-row">
+        <span class="summary-total-label">Estimated cost to you</span>
+        <span class="summary-total-value" id="s-total">—</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TAG_TABLE = [
+  { max: 1499, ft: 2374, tqt: 1780, ht: 1186 },
+  { max: 2499, ft: 1980, tqt: 1484, ht: 990  },
+  { max: 3499, ft: 1676, tqt: 1256, ht: 838  },
+  { max: 4499, ft: 1388, tqt: 1040, ht: 694  },
+  { max: 5499, ft: 1150, tqt: 862,  ht: 574  },
+  { max: 6499, ft: 898,  tqt: 672,  ht: 448  },
+  { max: 7499, ft: 654,  tqt: 490,  ht: 326  },
+];
+
+function fmt(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
+
+function getLoad(c) {
+  if (c >= 12) return 'ft';
+  if (c >= 9)  return 'tqt';
+  if (c >= 6)  return 'ht';
+  return 'none';
+}
+
+function getLoadLabel(load) {
+  if (load === 'ft')  return 'Full-time (12+ credits) · TAG eligible';
+  if (load === 'tqt') return 'Three-quarter time (9–11 credits) · TAG eligible';
+  if (load === 'ht')  return 'Half-time (6–8 credits) · TAG eligible';
+  return 'Below half-time · Not TAG eligible';
+}
+
+function getLoadClass(load) {
+  return { ft: 'load-ft', tqt: 'load-tqt', ht: 'load-ht', none: 'load-none' }[load];
+}
+
+function getTAG(njei, load) {
+  if (load === 'none') return null;
+  const row = TAG_TABLE.find(r => njei <= r.max);
+  return row ? row[load] : null;
+}
+
+function update() {
+  const credits = parseInt(document.getElementById('credits').value);
+  const valid = !isNaN(credits) && credits > 0;
+
+  const loadBadgeWrap  = document.getElementById('load-badge-wrap');
+  const tuitionDisplay = document.getElementById('tuition-display');
+  const tuitionSub     = document.getElementById('tuition-sub');
+  const pellStep       = document.getElementById('pell-step');
+  const pellResult     = document.getElementById('pell-result');
+  const tagStep        = document.getElementById('tag-step');
+  const tagResult      = document.getElementById('tag-result');
+  const summaryStep    = document.getElementById('summary-step');
+
+  if (!valid) {
+    tuitionDisplay.textContent = '—';
+    tuitionSub.textContent = '';
+    loadBadgeWrap.innerHTML = '';
+    pellStep.style.display = 'none';
+    tagStep.style.display = 'none';
+    summaryStep.style.display = 'none';
+    return;
+  }
+
+  const tuition = credits * 512;
+  const load = getLoad(credits);
+
+  tuitionDisplay.textContent = fmt(tuition);
+  tuitionSub.textContent = credits + ' cr × $512';
+  loadBadgeWrap.innerHTML = `<span class="load-badge ${getLoadClass(load)}">${getLoadLabel(load)}</span>`;
+
+  pellStep.style.display = 'block';
+
+  const pellSpringVal = document.getElementById('pell-spring').value;
+  const pellSpring = parseFloat(pellSpringVal);
+  let pellAward = 0;
+  let pellValid = false;
+  let prorationFactor = 0;
+
+  if (!isNaN(pellSpring) && pellSpring > 0) {
+    const prorationFactorCalc = Number((credits / 12).toFixed(2)); // Round to 2 decimal places, e.g., 4/12 = 0.33
+    const prorated = pellSpring * prorationFactorCalc;
+    
+    // Logic: Award is capped at the Full-Time (FT) Spring amount to prevent exceeding 1.0x proration
+    pellAward = Math.min(Math.round(prorated), pellSpring); 
+    
+    pellValid = true;
+    pellResult.style.display = 'block';
+
+    // Update helper text to reflect the cap if applicable
+    const isCapped = credits > 12;
+    pellResult.innerHTML = `
+      <div class="info-row"><span>Spring full-time Pell</span><span>${fmt(pellSpring)}</span></div>
+      <div class="info-row"><span>Enrollment factor</span><span>${credits} cr (Factor: ${(prorationFactorCalc).toFixed(2)})</span></div>
+      <div class="info-row" style="margin-top:8px; padding-top:8px; border-top:0.5px solid rgba(0,0,0,0.12)">
+        <span style="font-weight:500; color:#1a1a18">Summer Pell award</span>
+        <span class="info-value-blue">${fmt(pellAward)}</span>
+      </div>
+      ${isCapped ? `<p style="font-size:12px; color:#999; margin-top:6px;">Award capped at Full-Time Spring amount (calculated prorated: ${fmt(prorated)})</p>` : `<p style="font-size:12px; color:#999; margin-top:6px;">Summer Pell calculated normally.</p>`}
+    `;
+  } else {
+    pellResult.style.display = 'none';
+  }
+
+  let tagAward = 0;
+  let tagEligible = false;
+
+  if (load !== 'none') {
+    tagStep.style.display = 'block';
+    const njeiVal = document.getElementById('njei').value;
+    const njei = parseInt(njeiVal);
+
+    if (!isNaN(njei) && njei >= 0) {
+      tagResult.style.display = 'block';
+      const award = getTAG(njei, load);
+      if (award === null) {
+        tagResult.innerHTML = `<p class="ineligible-msg">NJEI above $7,499 — not eligible for TAG.</p>`;
+      } else {
+        const remaining = tuition - pellAward;
+        const applied = Math.min(award, remaining);
+        tagAward = applied;
+        tagEligible = true;
+        tagResult.innerHTML = `
+          <div class="info-row"><span>NJEI entered</span><span>$${njei.toLocaleString()}</span></div>
+          <div class="info-row"><span>Enrollment level</span><span>${load === 'ft' ? 'Full-time' : load === 'tqt' ? 'Three-quarter time' : 'Half-time'}</span></div>
+          <div class="info-row" style="margin-top:8px; padding-top:8px; border-top:0.5px solid rgba(0,0,0,0.12)">
+            <span style="font-weight:500; color:#1a1a18">TAG award</span>
+            <span class="info-value-green">${fmt(tagAward)}</span>
+          </div>
+          ${tagAward < award ? `<p style="font-size:12px; color:#999; margin-top:6px;">Award capped at remaining balance after Pell (table rate: ${fmt(award)})</p>` : ''}
+        `;
+      }
+    } else {
+      tagResult.style.display = 'none';
+    }
+  } else {
+    tagStep.style.display = 'none';
+    tagResult.style.display = 'none';
+  }
+
+  const net = tuition - pellAward - tagAward;
+  summaryStep.style.display = 'block';
+  document.getElementById('s-tuition').textContent = fmt(tuition);
+
+  const sPellRow = document.getElementById('s-pell-row');
+  if (pellValid && pellAward > 0) {
+    sPellRow.style.display = 'flex';
+    document.getElementById('s-pell').textContent = '− ' + fmt(pellAward);
+  } else {
+    sPellRow.style.display = 'none';
+  }
+
+  const sTagRow = document.getElementById('s-tag-row');
+  if (tagEligible && tagAward > 0) {
+    sTagRow.style.display = 'flex';
+    document.getElementById('s-tag').textContent = '− ' + fmt(tagAward);
+  } else {
+    sTagRow.style.display = 'none';
+  }
+
+  document.getElementById('s-total').textContent = fmt(Math.max(0, net));
+}
+</script>
+</body>
+</html>
