@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stockton University EOF Guide</title>
+  <meta name="description" content="Student-friendly guide to Stockton University’s Educational Opportunity Fund program." />
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    :root{
+      --bg:#f6f8fb; --card:#fff; --text:#1d2733; --muted:#5d6b7c; --brand:#0b5cab;
+      --brand2:#e7f1fb; --line:#d8e2ee; --ok:#127a3a; --warn:#8a5a00;
+      --shadow:0 8px 24px rgba(18,38,63,.08);
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);background:var(--bg);line-height:1.5}
+    a{color:var(--brand)}
+    .skip{position:absolute;left:-999px;top:auto}
+    .skip:focus{left:16px;top:16px;background:#fff;padding:8px 12px;border:2px solid var(--brand);z-index:9999}
+    header{background:linear-gradient(135deg,var(--brand),#083b6f);color:#fff;padding:32px 16px}
+    .wrap{max-width:1100px;margin:0 auto}
+    .hero{display:grid;gap:16px}
+    .hero p{max-width:70ch;margin:0}
+    nav{margin-top:18px;display:flex;flex-wrap:wrap;gap:10px}
+    nav a{background:rgba(255,255,255,.12);color:#fff;text-decoration:none;padding:8px 12px;border-radius:999px;font-size:.95rem}
+    main{padding:24px 16px 48px}
+    section{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;margin:0 0 18px}
+    h1,h2,h3{line-height:1.2;margin:0 0 12px}
+    h1{font-size:clamp(2rem,4vw,3rem)}
+    h2{font-size:1.5rem;color:#163a63}
+    h3{font-size:1.1rem;color:#163a63}
+    p,li{max-width:75ch}
+    .muted{color:var(--muted)}
+    .callout{border-left:4px solid var(--brand);background:var(--brand2);padding:14px 16px;border-radius:12px}
+    .warning{border-left-color:#a05b00;background:#fff7e6}
+    .success{border-left-color:var(--ok);background:#edf9f1}
+    ul,ol{padding-left:22px}
+    table{width:100%;border-collapse:collapse;margin-top:10px;font-size:.98rem}
+    th,td{border:1px solid var(--line);padding:10px 12px;text-align:left;vertical-align:top}
+    th{background:#eff5fb}
+    .grid{display:grid;gap:14px}
+    .two{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .card{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fafcff}
+    .pill{display:inline-block;background:#e9f2fb;color:#134b82;padding:4px 10px;border-radius:999px;font-size:.85rem;font-weight:600}
+    .toplink{font-size:.92rem}
+    .contacts{display:grid;gap:14px}
+    .contact{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fbfdff}
+    code{background:#eef4fb;padding:2px 5px;border-radius:6px}
+    @media (max-width:760px){ .two{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+  <a className="skip" href="#main">Skip to content</a>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    function SectionTitle({ id, eyebrow, title, children }) {
+      return (
+        <div>
+          {eyebrow && <div className="pill">{eyebrow}</div>}
+          <h2 id={id}>{title}</h2>
+          {children}
+        </div>
+      );
+    }
+
+    function Callout({ tone = "info", children }) {
+      const cls = tone === "warning" ? "callout warning" : tone === "success" ? "callout success" : "callout";
+      return <div className={cls}>{children}</div>;
+    }
+
+    function StepList({ steps }) {
+      return <ol>{steps.map((step, idx) => <li key={idx}>{step}</li>)}</ol>;
+    }
+
+    function App() {
+      return (
+        <>
+          <header>
+            <div className="wrap hero">
+              <div>
+                <h1>Stockton University EOF Guide</h1>
+                <p>
+                  A simple, student-friendly overview of Stockton’s Educational Opportunity Fund program:
+                  what it is, who qualifies, how to apply, and what happens after admission.
+                </p>
+              </div>
+              <nav aria-label="Page sections">
+                <a href="#intro">Intro</a>
+                <a href="#eligibility">Eligibility</a>
+                <a href="#income">Income limits</a>
+                <a href="#freshmen">Freshmen</a>
+                <a href="#transfers">Transfers</a>
+                <a href="#summer">Summer Academy</a>
+                <a href="#docs">Forms</a>
+                <a href="#expectations">Expectations</a>
+                <a href="#contacts">Contacts</a>
+                <a href="#faq">FAQ</a>
+              </nav>
+            </div>
+          </header>
+
+          <main id="main" className="wrap">
+            <Intro />
+            <EligibilityOverview />
+            <IncomeGuidelines />
+            <FreshmanAdmissionProcess />
+            <TransferAdmissionProcess />
+            <SummerAcademy />
+            <RequiredFormsAndDocs />
+            <ProgramExpectations />
+            <ContactsAndCampuses />
+            <FAQ />
+          </main>
+        </>
+      );
+    }
+
+    function Intro() {
+      return (
+        <section id="intro">
+          <SectionTitle title="What EOF is" />
+          <p>
+            Stockton’s Educational Opportunity Fund (EOF) is a special admissions and support program for New Jersey students
+            who come from educationally and economically disadvantaged backgrounds and have the drive to succeed in college.
+            It is funded by New Jersey OSHE and Stockton University.
+          </p>
+          <p>
+            EOF is more than financial aid. Students also get academic help, financial guidance, and personal support like
+            tutoring, advising, workshops, and counseling so they can get in, stay in, and graduate.
+          </p>
+          <Callout>
+            Key idea: EOF is a full support system, not just a grant.
+          </Callout>
+        </section>
+      );
+    }
+
+    function EligibilityOverview() {
+      return (
+        <section id="eligibility">
+          <SectionTitle title="Basic eligibility overview" />
+          <ul>
+            <li>Be from an educationally and economically disadvantaged background.</li>
+            <li>Be a New Jersey resident for at least 12 consecutive months before receiving EOF.</li>
+            <li>Apply to and be accepted by Stockton University.</li>
+            <li>Meet Stockton’s academic admission criteria.</li>
+            <li>Apply as a full-time undergraduate.</li>
+            <li>File the FAFSA or, for eligible undocumented/DACA students, the New Jersey Alternative Financial Aid Application.</li>
+            <li>Use Stockton’s FAFSA code: <strong>009345</strong>.</li>
+            <li>Have family income and assets within the EOF limits for your household size.</li>
+          </ul>
+          <p>
+            First-time applicants should show EOF interest on the undergraduate application. Stockton says EOF applicants can usually
+            apply test-optional, though some majors may still require scores.
+          </p>
+        </section>
+      );
+    }
+
+    function IncomeGuidelines() {
+      const rows = [
+        [1, "$31,300", "$6,260"],
+        [2, "$42,300", "$8,460"],
+        [3, "$53,300", "$10,660"],
+        [4, "$64,300", "$12,860"],
+        [5, "$75,300", "$15,060"],
+        [6, "$86,300", "$17,260"],
+        [7, "$97,300", "$19,460"],
+        [8, "$108,300", "$21,660"],
+      ];
+      return (
+        <section id="income">
+          <SectionTitle title="2026–2027 EOF income and asset caps" />
+          <p>
+            “Gross income” means total family income before taxes. The asset cap is the limit on counted assets like savings,
+            property, and similar resources. You must stay at or below both limits for your household size.
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Household size</th>
+                <th>Maximum gross income</th>
+                <th>Maximum asset cap</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r[0]}>
+                  <td>{r[0]}</td><td>{r[1]}</td><td>{r[2]}</td>
+                </tr>
+              ))}
+              <tr>
+                <td>Each person beyond 8</td>
+                <td>Add $11,000</td>
+                <td>Add $2,200</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      );
+    }
+
+    function FreshmanAdmissionProcess() {
+      const steps = [
+        "Explore EOF and decide whether it might fit you.",
+        "Review Stockton’s EOF page and the state eligibility page.",
+        "Check your household size, income, and assets against the EOF scale.",
+        "Apply to Stockton University as a freshman.",
+        "Complete the undergraduate application and mark your interest in EOF.",
+        "Follow Stockton’s test-optional policy unless your intended major requires test scores.",
+        "File the FAFSA or the New Jersey Alternative Financial Aid Application.",
+        "Use Stockton’s FAFSA code: 009345.",
+        "Send any extra verification documents Financial Aid asks for.",
+        "Watch email and your portal for EOF questionnaires, document requests, and invitations.",
+        "Complete all forms by the deadlines.",
+        "Prepare for the required five-week residential Summer Academy.",
+        "Complete the EOF acceptance packet forms and any related Financial Aid or Wellness Center paperwork.",
+        "Start fall semester as a full-time EOF student."
+      ];
+
+      return (
+        <section id="freshmen">
+          <SectionTitle title="Freshman EOF admission process" />
+          <StepList steps={steps} />
+          <Callout tone="success">
+            First-year EOF students do not pay acceptance deposits or housing deposits.
+          </Callout>
+        </section>
+      );
+    }
+
+    function TransferAdmissionProcess() {
+      return (
+        <section id="transfers">
+          <SectionTitle title="Transfer EOF admission process" />
+          <div className="grid two">
+            <div className="card">
+              <h3>Transfer students already in EOF elsewhere</h3>
+              <ol>
+                <li>Submit Stockton’s transfer application.</li>
+                <li>Send current transcripts from all high schools and colleges attended.</li>
+                <li>File the FAFSA and provide your SAR.</li>
+                <li>Submit Financial Aid Transcripts from previous schools if requested.</li>
+                <li>Complete Stockton’s EOF Transfer Application.</li>
+                <li>Ask your current EOF advisor to send the EOF Transfer Form to Stockton’s EOF office.</li>
+                <li>Attend the EOF information session when invited.</li>
+              </ol>
+            </div>
+            <div className="card">
+              <h3>Transfer students not yet in EOF</h3>
+              <ol>
+                <li>Apply to Stockton and send transcripts.</li>
+                <li>File the FAFSA or NJ Alternative Financial Aid Application.</li>
+                <li>Indicate EOF interest and complete Stockton’s EOF transfer form.</li>
+                <li>Work with EOF staff to confirm eligibility and next steps.</li>
+                <li>Attend any required information session or orientation.</li>
+              </ol>
+            </div>
+          </div>
+          <p>
+            Transfer applicants still need NJ residency, disadvantaged-background status, full-time enrollment, and income/assets within the EOF limits.
+          </p>
+        </section>
+      );
+    }
+
+    function SummerAcademy() {
+      return (
+        <section id="summer">
+          <SectionTitle title="Summer Academy" />
+          <p>
+            All first-year, full-time EOF students must complete a residential Summer Academy before their first fall semester.
+            It is required, not optional.
+          </p>
+          <div className="grid two">
+            <div className="card">
+              <h3>Why it matters</h3>
+              <ul>
+                <li>Builds college-level academic skills.</li>
+                <li>Teaches study habits and self-discipline.</li>
+                <li>Helps students grow socially and personally.</li>
+                <li>Builds confidence before fall classes begin.</li>
+              </ul>
+            </div>
+            <div className="card">
+              <h3>2026 schedule</h3>
+              <ul>
+                <li>Required overview: June 17, 2026, 3:30–5:00 PM via Zoom.</li>
+                <li>Summer Academy: Saturday, June 28 to Thursday, July 23, 2026.</li>
+                <li>Two on-campus weekends: 7/10–7/12 and 7/17–7/19.</li>
+                <li>Accuplacer testing is taken online before the overview date, with limited on-campus seating.</li>
+                <li>New Student Orientation is June 29, 2026, and EOF staff register students.</li>
+              </ul>
+            </div>
+          </div>
+          <Callout tone="warning">
+            Completing Summer Academy is a condition of joining Stockton as an EOF student.
+          </Callout>
+        </section>
+      );
+    }
+
+    function RequiredFormsAndDocs() {
+      return (
+        <section id="docs">
+          <SectionTitle title="Required forms and documents" />
+          <ul>
+            <li>EOF acceptance packet forms, completed and returned to your EOF campus program.</li>
+            <li>FAFSA or New Jersey Alternative Financial Aid Application.</li>
+            <li>Stockton FAFSA code: <strong>009345</strong>.</li>
+            <li>Verification documents requested by Financial Aid.</li>
+            <li>Student Aid Report (SAR) for transfers.</li>
+            <li>Financial Aid Transcript (FAT) for transfers, if requested.</li>
+            <li>Stockton EOF Transfer Application.</li>
+            <li>EOF Transfer Form from your current EOF advisor, if transferring from another EOF school.</li>
+            <li>Any Wellness Center or other student services forms Stockton asks for.</li>
+          </ul>
+          <Callout>
+            Plan ahead: EOF students do not pay acceptance deposits or housing deposits.
+          </Callout>
+        </section>
+      );
+    }
+
+    function ProgramExpectations() {
+      return (
+        <section id="expectations">
+          <SectionTitle title="What EOF expects after admission" />
+          <ul>
+            <li>Stay enrolled full-time, except rare situations like a final semester.</li>
+            <li>Maintain satisfactory academic progress.</li>
+            <li>Attend EOF meetings, advising sessions, workshops, and required activities.</li>
+            <li>Stay in good standing with the program.</li>
+            <li>Build community and connect with peers through EOF programming.</li>
+          </ul>
+          <p>
+            Some high-achievement groups linked to EOF, such as Chi Alpha Epsilon, may expect a 3.0 GPA, full-time status,
+            good standing, and service hours. That is an example of extra achievement-level participation, not the basic EOF admission bar.
+          </p>
+        </section>
+      );
+    }
+
+    function ContactsAndCampuses() {
+      return (
+        <section id="contacts">
+          <SectionTitle title="EOF contacts and campuses" />
+          <div className="contacts">
+            <div className="contact">
+              <h3>EOF-Galloway</h3>
+              <p><strong>Phone:</strong> 609-652-4647</p>
+              <p><strong>Fax:</strong> 609-626-3494</p>
+              <p><strong>Email:</strong> eofgalloway@stockton.edu</p>
+              <p><strong>Packet forms:</strong> Sherri.Barella@stockton.edu</p>
+              <p className="toplink">Office location: F-Wing 109</p>
+            </div>
+            <div className="contact">
+              <h3>EOF-Atlantic City</h3>
+              <p><strong>Phone:</strong> 609-761-1240</p>
+              <p><strong>Fax:</strong> 609-761-1212</p>
+              <p><strong>Email:</strong> eofac@stockton.edu</p>
+            </div>
+          </div>
+          <p>
+            Use the campus office tied to your program or application. If you are unsure which one to contact, start with the campus
+            where you applied and ask EOF staff to route you correctly.
+          </p>
+        </section>
+      );
+    }
+
+    function FAQ() {
+      return (
+        <section id="faq">
+          <SectionTitle title="FAQ" />
+          <div className="grid two">
+            <div className="card">
+              <h3>Can I apply without SAT or ACT scores?</h3>
+              <p>Usually yes, under Stockton’s test-optional policy, unless your intended major requires scores.</p>
+            </div>
+            <div className="card">
+              <h3>Do first-year EOF students need Summer Academy?</h3>
+              <p>Yes. It is mandatory for all first-year, full-time EOF students.</p>
+            </div>
+            <div className="card">
+              <h3>Do I have to pay a deposit?</h3>
+              <p>No acceptance deposit or housing deposit is required for EOF students.</p>
+            </div>
+            <div className="card">
+              <h3>What should I do first?</h3>
+              <p>Check eligibility, apply to Stockton, mark EOF interest, and file financial aid forms early.</p>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
