@@ -189,6 +189,69 @@ color:#444;
 font-style:italic;
 }
 
+/* Announcement banner - shown only when at least one .card has data-new="true" */
+.announcement{
+background:#EAF3FA;
+border:2px solid #0069AA;
+border-left:6px solid #0069AA;
+border-radius:8px;
+padding:18px 20px;
+margin-bottom:30px;
+display:none; /* revealed by JS only if new items exist */
+}
+
+.announcement.show{
+display:block;
+}
+
+.announcement h2{
+font-size:16px;
+color:#0069AA;
+margin-bottom:8px;
+}
+
+.announcement ul{
+list-style:none;
+padding:0;
+}
+
+.announcement li{
+margin-bottom:4px;
+}
+
+.announcement a{
+color:#0069AA;
+font-weight:bold;
+text-decoration:underline;
+}
+
+.announcement a:hover,
+.announcement a:focus-visible{
+color:#002A5C;
+}
+
+/* "New" badge shown on any card marked data-new="true" */
+.card{
+position:relative;
+}
+
+.card[data-new="true"] .new-badge{
+display:inline-block;
+}
+
+.new-badge{
+display:none;
+background:#FFC423;
+color:#000000;
+font-size:11px;
+font-weight:bold;
+text-transform:uppercase;
+letter-spacing:.03em;
+padding:3px 8px;
+border-radius:999px;
+margin-bottom:8px;
+}
+
 footer{
 text-align:center;
 padding:20px;
@@ -250,6 +313,11 @@ border-bottom:1px solid #ddd;
 
 <main id="main-content">
 
+<div id="announcement-banner" class="announcement" role="region" aria-labelledby="announcement-heading">
+<h2 id="announcement-heading">📢 Recently Added</h2>
+<ul id="announcement-list"></ul>
+</div>
+
 <label class="search-label" for="search">Search calculators</label>
 <input
 class="search"
@@ -273,8 +341,9 @@ autocomplete="off"
 
 </a>
 
-<a class="card tool" href="calculators/obbba-financial-aid-guide_v5.html">
+<a class="card tool" data-new="true" href="obbba-financial-aid-guide_v5.html">
 
+<span class="new-badge">New</span>
 <h3>OBBBA Financial Aid Guide</h3>
 
 <p>Reference guide covering One Big Beautiful Bill Act (OBBBA) changes affecting federal financial aid.</p>
@@ -285,78 +354,4 @@ autocomplete="off"
 
 </section>
 
-<section class="category" id="grant" aria-labelledby="grant-heading">
-
-<h2 id="grant-heading">Grant Calculators</h2>
-
-<div class="grid">
-
-<a class="card tool" href="calculators/summer-2025-aid.html">
-
-<h3>Summer 2025 Aid Calculator</h3>
-
-<p>Estimate grant and aid eligibility for Summer 2025 enrollment.</p>
-
-</a>
-
-</div>
-
-</section>
-
-<section class="category" id="reference" aria-labelledby="reference-heading">
-
-<h2 id="reference-heading">Reference</h2>
-
-<div class="grid">
-
-<a class="card tool" href="resources/policies.html">
-
-<h3>Office Policies</h3>
-
-<p>Internal financial aid references and procedures.</p>
-
-</a>
-
-</div>
-
-</section>
-
-<p id="no-results" class="no-results" hidden>No calculators match your search.</p>
-
-</main>
-
-</div>
-
-<footer>
-
-Financial Aid Toolkit • Version 1.1
-
-</footer>
-
-<script>
-
-const search=document.getElementById("search");
-const noResults=document.getElementById("no-results");
-
-search.addEventListener("keyup",()=>{
-
-const value=search.value.toLowerCase();
-let visibleCount=0;
-
-document.querySelectorAll(".tool").forEach(card=>{
-
-const text=card.innerText.toLowerCase();
-const match=text.includes(value);
-card.style.display=match?"block":"none";
-if(match) visibleCount++;
-
-});
-
-noResults.hidden = visibleCount !== 0;
-
-});
-
-</script>
-
-</body>
-</html>
+<section class="category" id="grant" aria-labelledby
