@@ -72,7 +72,7 @@ autocomplete="off"
 
 <div class="grid">
 
-<a class="card tool" href="calculators/loan-proration.html">
+<a class="card tool" data-published="2026-05-15" href="calculators/loan-proration.html">
 
 <h3>Loan Proration Calculator</h3>
 
@@ -80,9 +80,8 @@ autocomplete="off"
 
 </a>
 
-<a class="card tool" data-new="true" href="calculators/obbba-financial-aid-guide_v5.html">
+<a class="card tool" data-published="2026-07-06" href="calculators/obbba-financial-aid-guide_v5.html">
 
-<span class="new-badge">New</span>
 <h3>OBBBA Financial Aid Guide</h3>
 
 <p>Reference guide covering One Big Beautiful Bill Act (OBBBA) changes affecting federal financial aid.</p>
@@ -99,9 +98,8 @@ autocomplete="off"
 
 <div class="grid">
 
-<a class="card tool" data-new="true" href="calculators/summer-2025-aid.html">
+<a class="card tool" data-published="2026-07-05" href="calculators/summer-2025-aid.html">
 
-<span class="new-badge">New</span>
 <h3>Summer 2025 Aid Calculator</h3>
 
 <p>Estimate grant and aid eligibility for Summer 2025 enrollment.</p>
@@ -118,7 +116,7 @@ autocomplete="off"
 
 <div class="grid">
 
-<a class="card tool" href="reference/eof.html">
+<a class="card tool" data-published="2026-06-01" href="reference/eof.html">
 
 <h3>EOF Info</h3>
 
@@ -126,7 +124,7 @@ autocomplete="off"
 
 </a>
 
-<a class="card tool" href="resources/policies.html">
+<a class="card tool" data-published="2026-04-10" href="resources/policies.html">
 
 <h3>Office Policies</h3>
 
@@ -179,23 +177,63 @@ noResults.hidden = visibleCount !== 0;
 });
 
 (function(){
-const banner=document.getElementById("announcement-banner");
-const list=document.getElementById("announcement-list");
-const newCards=document.querySelectorAll('.card[data-new="true"]');
+  const DAYS_THRESHOLD = 7; // Consider pages "new" if published within 7 days
+  const banner = document.getElementById("announcement-banner");
+  const list = document.getElementById("announcement-list");
+  const cards = document.querySelectorAll(".card.tool");
+  
+  const today = new Date();
+  // Reset time part to compare pure calendar dates
+  today.setHours(0, 0, 0, 0);
+  
+  let newCount = 0;
 
-if(newCards.length===0) return;
+  cards.forEach(card => {
+    const publishedStr = card.getAttribute("data-published");
+    if (!publishedStr) return;
+    
+    // Parse using local time to avoid UTC timezone shifts
+    const publishDate = new Date(publishedStr + "T00:00:00");
+    
+    // Difference in milliseconds converted to days
+    const diffTime = today - publishDate;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    // If the page is published in the past and is within the threshold, mark it as new
+    if (diffDays >= 0 && diffDays <= DAYS_THRESHOLD) {
+      card.setAttribute("data-new", "true");
+      
+      // Dynamically add the "New" badge if it doesn't already exist
+      let badge = card.querySelector(".new-badge");
+      if (!badge) {
+        badge = document.createElement("span");
+        badge.className = "new-badge";
+        badge.textContent = "New";
+        card.insertBefore(badge, card.firstChild);
+      }
+      
+      // Add to announcement banner
+      const title = card.querySelector("h3")?.textContent.trim() || "New item";
+      const li = document.createElement("li");
+      const link = document.createElement("a");
+      link.href = card.getAttribute("href");
+      link.textContent = title;
+      li.appendChild(link);
+      list.appendChild(li);
+      
+      newCount++;
+    } else {
+      card.removeAttribute("data-new");
+      const badge = card.querySelector(".new-badge");
+      if (badge) badge.remove();
+    }
+  });
 
-newCards.forEach(card=>{
-const title=card.querySelector("h3")?.textContent.trim() || "New item";
-const li=document.createElement("li");
-const link=document.createElement("a");
-link.href=card.getAttribute("href");
-link.textContent=title;
-li.appendChild(link);
-list.appendChild(li);
-});
-
-banner.classList.add("show");
+  if (newCount > 0) {
+    banner.classList.add("show");
+  } else {
+    banner.classList.remove("show");
+  }
 })();
 
 </script>
