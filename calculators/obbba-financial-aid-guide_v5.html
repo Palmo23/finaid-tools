@@ -7,28 +7,28 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/stockton-theme.css">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:             #f8f8f8;
-      --surface:        #ffffff;
-      --surface-2:      #f0f0f0;
-      --surface-3:      #e8e8e8;
-      --accent:         #266BB0;
-      --accent-glow:    rgba(38,107,176,0.22);
-      --accent-dim:     rgba(38,107,176,0.10);
-      --text:           #1a1a1a;
-      --text-muted:     #666666;
+      --bg:             var(--bg-color);
+      --surface:        var(--card-bg);
+      --surface-2:      var(--bg-color);
+      --surface-3:      var(--border-color);
+      --accent:         var(--stockton-blue);
+      --accent-glow:    rgba(0, 105, 170, 0.15);
+      --accent-dim:     var(--stockton-blue-light);
+      --text:           var(--text-primary);
+      --text-muted:     var(--text-muted);
       --text-dim:       #aaaaaa;
-      --border:         rgba(38,107,176,0.13);
-      --border-strong:  rgba(38,107,176,0.32);
-      --success:        #5CC8A0;
-      --warning:        #F5B731;
-      --danger:         #E05555;
-      --font:           'Sora', sans-serif;
-      --mono:           'IBM Plex Mono', monospace;
+      --border:         var(--border-color);
+      --border-strong:  var(--stockton-blue);
+      --success:        var(--color-success);
+      --warning:        var(--color-warning);
+      --danger:         var(--color-error);
+      --font:           var(--font-sans);
+      --mono:           var(--font-mono);
       --hdr:            64px;
       --tnav:           50px;
     }
@@ -1178,17 +1178,21 @@
             <a href="https://stockton.edu/financial-aid/obbba-financial-aid-updates.html" target="_blank">View official page ↗</a>
           </div>
 
-          {/* Sticky header */}
-          <header className="hdr">
-            <div className="hdr-inner">
-              <div className="hdr-brand">
-                <img src="https://stockton.edu/relations/brand-guide/images/athletics-s-logo.png" alt="Stockton Logo" className="hdr-logo" />
-                <div>
-                  <div className="hdr-name">Stockton University</div>
-                  <div className="hdr-dept">Office of Financial Aid</div>
+          {/* Unified header */}
+          <header>
+            <div className="container header-inner">
+              <div className="header-brand">
+                <div className="stockton-logo">
+                  <img src="../images/stockton-logo.png" alt="Stockton University" style={{ height: "52px", width: "auto" }} />
+                </div>
+                <div className="header-title">
+                  <h1>Financial Aid Toolkit</h1>
+                  <p>Stockton University Office of Financial Aid</p>
                 </div>
               </div>
-              <div className="hdr-badge">Effective Jul 1, 2026</div>
+              <div className="header-nav">
+                <a href="../index.html">← Back to Toolkit</a>
+              </div>
             </div>
           </header>
 

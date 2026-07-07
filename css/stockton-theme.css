@@ -1,0 +1,585 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Stockton University Brand Colors */
+  --stockton-blue: #0069AA;
+  --stockton-blue-dark: #002A5C;
+  --stockton-blue-light: #EAF3FA;
+  --stockton-gold: #FFC423;
+  --stockton-gold-dark: #D4A117;
+  
+  /* Neutral Color Palette */
+  --bg-color: #F4F6F8;
+  --card-bg: #FFFFFF;
+  --text-primary: #1D2733;
+  --text-muted: #5D6B7C;
+  --border-color: #D8E2EE;
+  
+  /* Status Colors */
+  --color-success: #127A3A;
+  --color-success-bg: #EDF9F1;
+  --color-warning: #8A5A00;
+  --color-warning-bg: #FFF7E6;
+  --color-error: #B71C1C;
+  --color-error-bg: #FFEBEB;
+
+  /* Typography & Layout Tokens */
+  --font-sans: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  
+  /* Radii */
+  --radius-btn: 6px;
+  --radius-card: 12px;
+  
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(29, 39, 51, 0.08);
+  --shadow-md: 0 4px 16px rgba(29, 39, 51, 0.12);
+  
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* -------------------------------------------------------------
+   1. RESET & BASE ELEMENTS
+   ------------------------------------------------------------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--stockton-blue-dark);
+  font-weight: 600;
+  line-height: 1.25;
+  margin-bottom: 0.5rem;
+}
+
+p {
+  margin-bottom: 1rem;
+  max-width: 75ch;
+}
+
+a {
+  color: var(--stockton-blue);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  transition: color var(--transition-fast), text-decoration-color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--stockton-blue-dark);
+  text-decoration-color: var(--stockton-blue-dark);
+}
+
+/* Skip link */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--stockton-gold);
+  color: var(--text-primary);
+  padding: 12px 20px;
+  font-weight: bold;
+  z-index: 1000;
+  border-radius: 0 0 6px 0;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  left: 0;
+}
+
+:focus-visible {
+  outline: 3px solid var(--stockton-blue);
+  outline-offset: 2px;
+}
+
+/* -------------------------------------------------------------
+   2. LAYOUT & CONTAINERS
+   ------------------------------------------------------------- */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.main-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: calc(100vh - 180px);
+}
+
+aside {
+  background: var(--card-bg);
+  border-right: 1px solid var(--border-color);
+  padding: 2rem 1.5rem;
+}
+
+aside h3 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+aside ul {
+  list-style: none;
+}
+
+aside li {
+  margin-bottom: 0.75rem;
+}
+
+aside a {
+  text-decoration: none;
+  font-weight: 500;
+  display: block;
+  padding: 0.35rem 0;
+}
+
+aside a:hover {
+  text-decoration: underline;
+}
+
+main {
+  padding: 2.5rem 2rem;
+}
+
+/* -------------------------------------------------------------
+   3. BRANDED HEADER & FOOTER
+   ------------------------------------------------------------- */
+header {
+  background: var(--stockton-blue);
+  color: #FFFFFF;
+  border-bottom: 4px solid var(--stockton-gold);
+  padding: 1rem 0;
+}
+
+header .header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+header .header-brand {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+header .stockton-logo img {
+  height: 52px;
+  width: auto;
+  display: block;
+  filter: brightness(0) invert(1);
+}
+
+header .header-title h1 {
+  font-size: 1.75rem;
+  color: #FFFFFF;
+  margin-bottom: 0.15rem;
+  font-weight: 600;
+}
+
+header .header-title p {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+header .header-nav a {
+  color: #FFFFFF;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-btn);
+  font-weight: 500;
+  font-size: 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: background var(--transition-fast);
+}
+
+header .header-nav a:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.brand-bar {
+  background: var(--stockton-blue-dark);
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  padding: 1.25rem;
+  font-size: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.brand-bar a {
+  color: #FFFFFF;
+  text-decoration: underline;
+}
+
+/* -------------------------------------------------------------
+   4. CARDS & GRIDS
+   ------------------------------------------------------------- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.card {
+  background: var(--card-bg);
+  padding: 2rem;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-normal);
+  text-decoration: none;
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--stockton-blue);
+}
+
+.card h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  color: var(--stockton-blue-dark);
+}
+
+.card p {
+  font-size: 0.925rem;
+  color: var(--text-muted);
+  margin-bottom: 0;
+  line-height: 1.5;
+}
+
+/* Badges */
+.new-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: var(--stockton-gold);
+  color: var(--stockton-blue-dark);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+
+/* -------------------------------------------------------------
+   5. FORMS, INPUTS, & INTERACTIVE ELEMENTS
+   ------------------------------------------------------------- */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+label {
+  display: block;
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: var(--stockton-blue-dark);
+  margin-bottom: 0.5rem;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="email"],
+select,
+textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-family: var(--font-sans);
+  border-radius: var(--radius-btn);
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--stockton-blue);
+  box-shadow: 0 0 0 3px rgba(0, 105, 170, 0.15);
+  background-color: var(--card-bg);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-btn);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.1s ease, background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-primary {
+  background-color: var(--stockton-blue);
+  color: #FFFFFF;
+}
+
+.btn-primary:hover {
+  background-color: var(--stockton-blue-dark);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  border-color: var(--stockton-blue);
+  color: var(--stockton-blue);
+}
+
+.btn-secondary:hover {
+  background-color: rgba(0, 105, 170, 0.05);
+}
+
+.btn-gold {
+  background-color: var(--stockton-gold);
+  color: var(--stockton-blue-dark);
+}
+
+.btn-gold:hover {
+  background-color: var(--stockton-gold-dark);
+}
+
+/* -------------------------------------------------------------
+   6. TABLES, CALLOUTS, & ALERTS
+   ------------------------------------------------------------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  background-color: var(--card-bg);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+}
+
+th, td {
+  padding: 1rem 1.25rem;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--stockton-blue-light);
+  color: var(--stockton-blue-dark);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+/* Callouts / Alert Panels */
+.callout {
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--radius-card);
+  border-left: 4px solid var(--stockton-blue);
+  background-color: var(--stockton-blue-light);
+  margin-bottom: 1.5rem;
+}
+
+.callout h4 {
+  color: var(--stockton-blue-dark);
+  font-size: 1.05rem;
+  margin-bottom: 0.25rem;
+}
+
+.callout p:last-child {
+  margin-bottom: 0;
+}
+
+.callout.warning {
+  border-left-color: var(--color-warning);
+  background-color: var(--color-warning-bg);
+  color: #5C3D00;
+}
+
+.callout.warning h4 {
+  color: #724E00;
+}
+
+.callout.success {
+  border-left-color: var(--color-success);
+  background-color: var(--color-success-bg);
+  color: #0A4D24;
+}
+
+.callout.success h4 {
+  color: var(--color-success);
+}
+
+.callout.danger {
+  border-left-color: var(--color-error);
+  background-color: var(--color-error-bg);
+  color: #7A1010;
+}
+
+.callout.danger h4 {
+  color: var(--color-error);
+}
+
+/* -------------------------------------------------------------
+   7. STEP-BY-STEP PROGRESS BAR (for Calculators)
+   ------------------------------------------------------------- */
+.progress-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  margin-bottom: 2.5rem;
+  padding: 0 1rem;
+}
+
+.progress-bar::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--border-color);
+  z-index: 1;
+  transform: translateY(-50%);
+}
+
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 2;
+  position: relative;
+}
+
+.progress-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg-color);
+  border: 2px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+  transition: all var(--transition-normal);
+}
+
+.progress-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: color var(--transition-normal);
+}
+
+.progress-step.active .progress-dot {
+  border-color: var(--stockton-blue);
+  background: var(--stockton-blue);
+  color: #FFFFFF;
+  box-shadow: 0 0 0 4px rgba(0, 105, 170, 0.15);
+}
+
+.progress-step.active .progress-label {
+  color: var(--stockton-blue);
+  font-weight: 600;
+}
+
+.progress-step.completed .progress-dot {
+  border-color: var(--stockton-blue);
+  background: var(--stockton-blue-light);
+  color: var(--stockton-blue);
+}
+
+.progress-step.completed .progress-label {
+  color: var(--stockton-blue);
+}
+
+/* -------------------------------------------------------------
+   8. RESPONSIVE DESIGN (MEDIA QUERIES)
+   ------------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .main-layout {
+    grid-template-columns: 1fr;
+  }
+
+  aside {
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.5rem;
+  }
+
+  main {
+    padding: 2rem 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  header .header-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  header .header-nav {
+    width: 100%;
+  }
+
+  header .header-nav a {
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .progress-label {
+    display: none; /* Hide step labels on small screens to prevent crowding */
+  }
+}

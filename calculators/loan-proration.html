@@ -4,14 +4,38 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Federal Direct Loan Proration Calculator — Stockton University</title>
+  <link rel="stylesheet" href="../css/stockton-theme.css" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #f7f5f0; }
-    input[type="range"] { accent-color: #1b4332; }
+    input[type="range"] { accent-color: var(--stockton-blue); }
   </style>
 </head>
 <body>
-  <div id="root"></div>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
+  <header>
+    <div class="container header-inner">
+      <div class="header-brand">
+        <div class="stockton-logo">
+          <img src="../images/stockton-logo.png" alt="Stockton University">
+        </div>
+        <div class="header-title">
+          <h1>Financial Aid Toolkit</h1>
+          <p>Stockton University Office of Financial Aid</p>
+        </div>
+      </div>
+      <div class="header-nav">
+        <a href="../index.html">← Back to Toolkit</a>
+      </div>
+    </div>
+  </header>
+  
+  <main id="main-content" class="container">
+    <div id="root"></div>
+  </main>
+
+  <div class="brand-bar">
+    Stockton University • Financial Aid Office • <a href="https://stockton.edu/financial-aid/">Official Website</a>
+  </div>
 
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -36,48 +60,31 @@
 
     const S = {
       root: {
-        fontFamily: "'Georgia', serif",
+        fontFamily: "var(--font-sans)",
         maxWidth: 680,
-        margin: "0 auto",
-        padding: "2rem 1.5rem",
-        background: "#f7f5f0",
-        minHeight: "100vh",
-        color: "#1a1a1a",
+        margin: "2rem auto 4rem",
+        padding: 0,
+        background: "transparent",
+        color: "var(--text-primary)",
       },
       header: {
-        marginBottom: "2rem",
-        borderBottom: "2px solid #1b4332",
-        paddingBottom: "1.25rem",
+        display: "none"
       },
       wordmark: {
-        fontSize: 12,
-        letterSpacing: "0.15em",
-        textTransform: "uppercase",
-        color: "#1b4332",
-        fontFamily: "Arial, sans-serif",
-        fontWeight: 700,
-        marginBottom: 6,
+        display: "none"
       },
       title: {
-        fontSize: 26,
-        fontWeight: "normal",
-        color: "#1b4332",
-        margin: 0,
-        lineHeight: 1.25,
+        display: "none"
       },
       subtitle: {
-        fontSize: 14,
-        color: "#555",
-        marginTop: 6,
-        fontFamily: "sans-serif",
-        lineHeight: 1.6,
+        display: "none"
       },
       progress: {
         display: "flex",
         alignItems: "center",
         gap: 0,
         marginBottom: "2rem",
-        fontFamily: "sans-serif",
+        fontFamily: "var(--font-sans)",
       },
       stepDot: (active, done) => ({
         width: 28,
@@ -88,61 +95,64 @@
         justifyContent: "center",
         fontSize: 12,
         fontWeight: 600,
-        background: done ? "#1b4332" : active ? "#2d6a4f" : "#d9d4c7",
-        color: done || active ? "#fff" : "#888",
+        background: done ? "var(--stockton-blue-light)" : active ? "var(--stockton-blue)" : "var(--bg-color)",
+        border: done ? "2px solid var(--stockton-blue)" : active ? "2px solid var(--stockton-blue)" : "2px solid var(--border-color)",
+        color: done ? "var(--stockton-blue)" : active ? "#fff" : "var(--text-muted)",
         flexShrink: 0,
-        transition: "background 0.3s",
+        transition: "all 0.3s",
       }),
       stepLabel: (active, done) => ({
         fontSize: 11,
         letterSpacing: "0.05em",
         textTransform: "uppercase",
-        color: done ? "#1b4332" : active ? "#2d6a4f" : "#999",
+        color: done || active ? "var(--stockton-blue-dark)" : "var(--text-muted)",
         fontWeight: active || done ? 700 : 400,
+        fontFamily: "var(--font-sans)",
       }),
       stepLine: (done) => ({
         flex: 1,
         height: 2,
-        background: done ? "#1b4332" : "#d9d4c7",
+        background: done ? "var(--stockton-blue)" : "var(--border-color)",
         transition: "background 0.3s",
         margin: "0 6px",
       }),
       card: {
-        background: "#fff",
-        border: "1px solid #ddd8cc",
-        borderRadius: 8,
-        padding: "1.75rem 1.5rem",
+        background: "var(--card-bg)",
+        border: "1px solid var(--border-color)",
+        borderRadius: "var(--radius-card)",
+        padding: "2rem 1.5rem",
         marginBottom: "1.25rem",
+        boxShadow: "var(--shadow-sm)",
       },
       questionText: {
-        fontSize: 20,
-        fontWeight: "normal",
-        color: "#1a1a1a",
+        fontSize: 18,
+        fontWeight: 600,
+        color: "var(--stockton-blue-dark)",
         marginBottom: 8,
         lineHeight: 1.35,
       },
       educationBox: {
-        background: "#eaf4ef",
-        border: "1px solid #a8d5bc",
-        borderLeft: "4px solid #2d6a4f",
-        borderRadius: 4,
-        padding: "0.85rem 1rem",
-        fontSize: 13,
-        color: "#1b4332",
+        background: "var(--stockton-blue-light)",
+        border: "1px solid var(--border-color)",
+        borderLeft: "4px solid var(--stockton-blue)",
+        borderRadius: "var(--radius-card)",
+        padding: "1rem 1.25rem",
+        fontSize: 14,
+        color: "var(--stockton-blue-dark)",
         marginBottom: "1.25rem",
-        fontFamily: "sans-serif",
+        fontFamily: "var(--font-sans)",
         lineHeight: 1.65,
       },
       warningBox: {
-        background: "#fff8ec",
-        border: "1px solid #f0c97a",
-        borderLeft: "4px solid #e09020",
-        borderRadius: 4,
-        padding: "0.85rem 1rem",
-        fontSize: 13,
-        color: "#7a4f00",
+        background: "var(--color-warning-bg)",
+        border: "1px solid var(--border-color)",
+        borderLeft: "4px solid var(--color-warning)",
+        borderRadius: "var(--radius-card)",
+        padding: "1rem 1.25rem",
+        fontSize: 14,
+        color: "var(--color-warning)",
         marginBottom: "1.25rem",
-        fontFamily: "sans-serif",
+        fontFamily: "var(--font-sans)",
         lineHeight: 1.65,
       },
       optionGrid: {
@@ -152,26 +162,26 @@
         marginTop: "1rem",
       },
       optionBtn: (selected) => ({
-        border: selected ? "2px solid #1b4332" : "1.5px solid #ccc",
-        borderRadius: 6,
-        padding: "1rem",
-        background: selected ? "#eaf4ef" : "#fff",
+        border: selected ? "2px solid var(--stockton-blue)" : "1.5px solid var(--border-color)",
+        borderRadius: "var(--radius-btn)",
+        padding: "1.25rem",
+        background: selected ? "var(--stockton-blue-light)" : "var(--card-bg)",
         cursor: "pointer",
         textAlign: "left",
-        fontFamily: "sans-serif",
+        fontFamily: "var(--font-sans)",
         transition: "all 0.15s",
         width: "100%",
       }),
       optionTitle: (selected) => ({
         fontSize: 15,
         fontWeight: 600,
-        color: selected ? "#1b4332" : "#222",
+        color: selected ? "var(--stockton-blue-dark)" : "var(--text-primary)",
         marginBottom: 4,
         display: "block",
       }),
       optionDesc: {
         fontSize: 12,
-        color: "#666",
+        color: "var(--text-muted)",
         lineHeight: 1.5,
         display: "block",
       },
@@ -179,86 +189,92 @@
       sliderLabel: {
         display: "flex",
         justifyContent: "space-between",
-        fontFamily: "sans-serif",
+        fontFamily: "var(--font-sans)",
         marginBottom: 8,
       },
-      sliderLabelText: { fontSize: 13, color: "#555", alignSelf: "center" },
-      sliderValue: { fontSize: 22, fontWeight: 600, color: "#1b4332" },
-      slider: { width: "100%", cursor: "pointer" },
+      sliderLabelText: { fontSize: 13, color: "var(--text-muted)", alignSelf: "center" },
+      sliderValue: { fontSize: 24, fontWeight: 700, color: "var(--stockton-blue)" },
+      slider: { width: "100%", cursor: "pointer", accentColor: "var(--stockton-blue)" },
       sliderTicks: {
         display: "flex",
         justifyContent: "space-between",
-        fontFamily: "sans-serif",
+        fontFamily: "var(--font-sans)",
         fontSize: 11,
-        color: "#999",
+        color: "var(--text-muted)",
         marginTop: 4,
         paddingLeft: 2,
         paddingRight: 2,
       },
       btnRow: { display: "flex", gap: 10, marginTop: "1.5rem" },
       btnPrimary: {
-        background: "#1b4332",
+        background: "var(--stockton-blue)",
         color: "#fff",
         border: "none",
-        borderRadius: 6,
-        padding: "0.65rem 1.5rem",
+        borderRadius: "var(--radius-btn)",
+        padding: "0.75rem 1.5rem",
         fontSize: 14,
-        fontFamily: "sans-serif",
+        fontFamily: "var(--font-sans)",
         fontWeight: 600,
         cursor: "pointer",
         letterSpacing: "0.02em",
+        transition: "transform 0.1s ease, background-color var(--transition-fast)",
       },
       btnSecondary: {
         background: "transparent",
-        color: "#1b4332",
-        border: "1.5px solid #1b4332",
-        borderRadius: 6,
-        padding: "0.65rem 1.25rem",
+        color: "var(--stockton-blue)",
+        border: "1.5px solid var(--stockton-blue)",
+        borderRadius: "var(--radius-btn)",
+        padding: "0.75rem 1.25rem",
         fontSize: 14,
-        fontFamily: "sans-serif",
+        fontFamily: "var(--font-sans)",
+        fontWeight: 600,
         cursor: "pointer",
+        transition: "background-color var(--transition-fast)",
       },
       resultCard: {
-        background: "#fff",
-        border: "1px solid #ddd8cc",
-        borderRadius: 8,
+        background: "var(--card-bg)",
+        border: "1px solid var(--border-color)",
+        borderRadius: "var(--radius-card)",
         overflow: "hidden",
         marginBottom: "1.25rem",
+        boxShadow: "var(--shadow-sm)",
       },
       resultHeader: {
-        background: "#1b4332",
+        background: "var(--stockton-blue)",
         color: "#fff",
-        padding: "1rem 1.5rem",
-        fontFamily: "sans-serif",
+        padding: "1.25rem 1.5rem",
+        fontFamily: "var(--font-sans)",
       },
       resultHeaderTitle: {
-        fontSize: 13,
+        fontSize: 11,
         letterSpacing: "0.1em",
         textTransform: "uppercase",
-        opacity: 0.75,
+        opacity: 0.85,
         margin: 0,
+        fontWeight: 600,
       },
       resultHeaderAmt: {
-        fontSize: 36,
-        fontWeight: "normal",
+        fontSize: 32,
+        fontWeight: 700,
         margin: "4px 0 0",
-        fontFamily: "Georgia, serif",
+        fontFamily: "var(--font-sans)",
       },
-      resultBody: { padding: "1.25rem 1.5rem" },
+      resultBody: { padding: "1.5rem" },
       formulaWrap: {
-        background: "#f7f5f0",
-        border: "1px solid #ddd8cc",
-        borderRadius: 6,
-        padding: "1rem 1.25rem",
-        fontFamily: "sans-serif",
-        marginBottom: "1.25rem",
+        background: "var(--bg-color)",
+        border: "1px solid var(--border-color)",
+        borderRadius: "var(--radius-btn)",
+        padding: "1.25rem",
+        fontFamily: "var(--font-sans)",
+        marginBottom: "1.5rem",
       },
       formulaTitle: {
         fontSize: 11,
         letterSpacing: "0.1em",
         textTransform: "uppercase",
-        color: "#888",
+        color: "var(--text-muted)",
         marginBottom: 10,
+        fontWeight: 600,
       },
       formulaRow: {
         display: "flex",
@@ -276,56 +292,60 @@
       formulaNum: {
         fontSize: 16,
         fontWeight: 700,
-        color: "#1b4332",
-        borderBottom: "2px solid #1b4332",
+        color: "var(--stockton-blue)",
+        borderBottom: "2px solid var(--stockton-blue)",
         paddingBottom: 2,
         lineHeight: 1,
       },
-      formulaDen: { fontSize: 13, color: "#555", lineHeight: 1, paddingTop: 2 },
-      formulaOp:  { color: "#888", fontSize: 18 },
-      formulaAnnual: { fontSize: 15, fontWeight: 600, color: "#1b4332" },
+      formulaDen: { fontSize: 13, color: "var(--text-primary)", lineHeight: 1, paddingTop: 2 },
+      formulaOp:  { color: "var(--text-muted)", fontSize: 18 },
+      formulaAnnual: { fontSize: 15, fontWeight: 600, color: "var(--stockton-blue)" },
       loanBreakdown: {
         display: "grid",
         gridTemplateColumns: "1fr 1fr 1fr",
-        gap: 10,
-        marginBottom: "1rem",
+        gap: 12,
+        marginBottom: "1.25rem",
       },
       loanType: (c) => ({
-        background: c === "sub" ? "#eaf4ef" : c === "unsub" ? "#fff8ec" : "#e9f0fb",
-        borderRadius: 6,
-        padding: "0.75rem",
-        fontFamily: "sans-serif",
+        background: c === "sub" ? "var(--color-success-bg)" : c === "unsub" ? "var(--color-warning-bg)" : "var(--stockton-blue-light)",
+        borderRadius: "var(--radius-btn)",
+        padding: "0.85rem",
+        fontFamily: "var(--font-sans)",
         textAlign: "center",
+        border: `1px solid ${c === 'sub' ? 'rgba(18,122,58,0.15)' : c === 'unsub' ? 'rgba(138,90,0,0.15)' : 'var(--border-color)'}`,
       }),
       loanTypeLabel: {
-        fontSize: 11,
+        fontSize: 10,
         letterSpacing: "0.08em",
         textTransform: "uppercase",
-        color: "#666",
+        color: "var(--text-muted)",
         display: "block",
         marginBottom: 4,
+        fontWeight: 600,
       },
       loanTypeAmt: (c) => ({
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: 700,
-        color: c === "sub" ? "#1b4332" : c === "unsub" ? "#7a4f00" : "#1a3a6b",
+        color: c === "sub" ? "var(--color-success)" : c === "unsub" ? "var(--color-warning)" : "var(--stockton-blue-dark)",
         display: "block",
       }),
       callout: {
-        background: "#f7f5f0",
-        borderRadius: 6,
-        padding: "0.85rem 1rem",
+        background: "var(--bg-color)",
+        borderRadius: "var(--radius-btn)",
+        padding: "1rem 1.25rem",
         fontSize: 13,
-        color: "#444",
-        fontFamily: "sans-serif",
+        color: "var(--text-primary)",
+        fontFamily: "var(--font-sans)",
         lineHeight: 1.65,
+        borderLeft: "4px solid var(--stockton-blue)",
       },
       resetBtn: {
         background: "transparent",
         border: "none",
-        color: "#1b4332",
+        color: "var(--stockton-blue)",
         fontSize: 13,
-        fontFamily: "sans-serif",
+        fontFamily: "var(--font-sans)",
+        fontWeight: 600,
         cursor: "pointer",
         textDecoration: "underline",
         padding: 0,
@@ -333,24 +353,26 @@
         display: "block",
       },
       notEligibleCard: {
-        background: "#fff",
-        border: "1px solid #ddd8cc",
-        borderRadius: 8,
-        padding: "2rem 1.5rem",
-        fontFamily: "sans-serif",
+        background: "var(--card-bg)",
+        border: "1px solid var(--border-color)",
+        borderRadius: "var(--radius-card)",
+        padding: "2.5rem 1.5rem",
+        fontFamily: "var(--font-sans)",
         textAlign: "center",
+        boxShadow: "var(--shadow-sm)",
       },
       badge: {
         display: "inline-block",
-        background: "#fff3cd",
-        color: "#7a4f00",
+        background: "var(--color-warning-bg)",
+        color: "var(--color-warning)",
         fontSize: 12,
         fontWeight: 600,
         letterSpacing: "0.05em",
-        padding: "3px 10px",
+        padding: "4px 12px",
         borderRadius: 20,
         marginBottom: 12,
-        fontFamily: "sans-serif",
+        fontFamily: "var(--font-sans)",
+        border: "1px solid rgba(138,90,0,0.15)",
       },
     };
 
@@ -391,15 +413,7 @@
       return (
         <div style={S.root}>
 
-          {/* ── Header ── */}
-          <div style={S.header}>
-            <div style={S.wordmark}>Stockton University · Office of Financial Aid</div>
-            <h1 style={S.title}>Federal Direct Loan Proration Calculator</h1>
-            <p style={S.subtitle}>
-              Estimate your prorated loan eligibility if you're graduating this semester
-              and enrolled in fewer than a full academic year of credits.
-            </p>
-          </div>
+
 
           <ProgressBar />
 

@@ -8,54 +8,165 @@
   <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link rel="stylesheet" href="../css/stockton-theme.css" />
   <style>
-    :root{
-      --bg:#f6f8fb; --card:#fff; --text:#1d2733; --muted:#5d6b7c; --brand:#0b5cab;
-      --brand2:#e7f1fb; --line:#d8e2ee; --ok:#127a3a; --warn:#8a5a00;
-      --shadow:0 8px 24px rgba(18,38,63,.08);
-      --radius:16px;
+    :root {
+      --bg:             var(--bg-color);
+      --card:           var(--card-bg);
+      --text:           var(--text-primary);
+      --muted:          var(--text-muted);
+      --brand:          var(--stockton-blue);
+      --brand2:         var(--stockton-blue-light);
+      --line:           var(--border-color);
+      --ok:             var(--color-success);
+      --warn:           var(--color-warning);
+      --shadow:         var(--shadow-sm);
+      --radius:         var(--radius-card);
     }
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);background:var(--bg);line-height:1.5}
-    a{color:var(--brand)}
-    .skip{position:absolute;left:-999px;top:auto}
-    .skip:focus{left:16px;top:16px;background:#fff;padding:8px 12px;border:2px solid var(--brand);z-index:9999}
-    header{background:linear-gradient(135deg,var(--brand),#083b6f);color:#fff;padding:32px 16px}
-    .wrap{max-width:1100px;margin:0 auto}
-    .hero{display:grid;gap:16px}
-    .hero p{max-width:70ch;margin:0}
-    nav{margin-top:18px;display:flex;flex-wrap:wrap;gap:10px}
-    nav a{background:rgba(255,255,255,.12);color:#fff;text-decoration:none;padding:8px 12px;border-radius:999px;font-size:.95rem}
-    main{padding:24px 16px 48px}
-    section{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;margin:0 0 18px}
-    h1,h2,h3{line-height:1.2;margin:0 0 12px}
-    h1{font-size:clamp(2rem,4vw,3rem)}
-    h2{font-size:1.5rem;color:#163a63}
-    h3{font-size:1.1rem;color:#163a63}
-    p,li{max-width:75ch}
-    .muted{color:var(--muted)}
-    .callout{border-left:4px solid var(--brand);background:var(--brand2);padding:14px 16px;border-radius:12px}
-    .warning{border-left-color:#a05b00;background:#fff7e6}
-    .success{border-left-color:var(--ok);background:#edf9f1}
-    ul,ol{padding-left:22px}
-    table{width:100%;border-collapse:collapse;margin-top:10px;font-size:.98rem}
-    th,td{border:1px solid var(--line);padding:10px 12px;text-align:left;vertical-align:top}
-    th{background:#eff5fb}
-    .grid{display:grid;gap:14px}
-    .two{grid-template-columns:repeat(2,minmax(0,1fr))}
-    .card{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fafcff}
-    .pill{display:inline-block;background:#e9f2fb;color:#134b82;padding:4px 10px;border-radius:999px;font-size:.85rem;font-weight:600}
-    .toplink{font-size:.92rem}
-    .contacts{display:grid;gap:14px}
-    .contact{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fbfdff}
-    code{background:#eef4fb;padding:2px 5px;border-radius:6px}
-    @media (max-width:760px){ .two{grid-template-columns:1fr} }
+    
+    html { scroll-behavior: smooth; }
+    
+    /* eof.html specific layout overrides */
+    .wrap { max-width: 1000px; margin: 0 auto; padding: 0 1rem; }
+    
+    .eof-hero {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 2.5rem 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow);
+      margin-top: 2rem;
+    }
+    
+    .eof-hero h1 {
+      font-size: 2.25rem;
+      color: var(--stockton-blue-dark);
+      margin-bottom: 0.75rem;
+      font-weight: 700;
+    }
+    
+    .eof-hero p {
+      font-size: 1.05rem;
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 75ch;
+      margin-bottom: 1.5rem;
+    }
+    
+    .eof-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .eof-nav a {
+      background: var(--bg);
+      color: var(--brand);
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border: 1px solid var(--line);
+      transition: all var(--transition-fast);
+    }
+    
+    .eof-nav a:hover {
+      background: var(--brand2);
+      color: var(--stockton-blue-dark);
+      border-color: var(--brand);
+    }
+    
+    main { padding: 0; }
+    
+    section {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 2.5rem 2rem;
+      margin-bottom: 2rem;
+      scroll-margin-top: 2rem;
+    }
+    
+    section h2 {
+      font-size: 1.6rem;
+      color: var(--stockton-blue-dark);
+      margin-bottom: 1.25rem;
+      border-bottom: 2px solid var(--stockton-gold);
+      display: inline-block;
+      padding-bottom: 6px;
+    }
+    
+    section h3 {
+      font-size: 1.2rem;
+      color: var(--stockton-blue-dark);
+      margin-bottom: 0.75rem;
+    }
+    
+    p, li { max-width: 75ch; line-height: 1.6; }
+    ul, ol { padding-left: 24px; margin-bottom: 1rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    /* Component styles compatibility */
+    .callout {
+      border-left: 4px solid var(--brand);
+      background: var(--brand2);
+      padding: 1.25rem 1.5rem;
+      border-radius: 8px;
+      margin: 1.5rem 0;
+      color: var(--stockton-blue-dark);
+    }
+    .callout.warning { border-left-color: var(--warn); background: #fff7e6; color: #5c3d00; }
+    .callout.success { border-left-color: var(--ok); background: #edf9f1; color: #0a4d24; }
+    
+    table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.95rem; }
+    th, td { border: 1px solid var(--line); padding: 12px 16px; text-align: left; vertical-align: top; }
+    th { background: var(--brand2); color: var(--stockton-blue-dark); font-weight: 600; }
+    
+    .grid { display: grid; gap: 1.5rem; }
+    .two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .card { border: 1px solid var(--line); border-radius: var(--radius); padding: 1.5rem; background: var(--bg); box-shadow: none; transform: none; transition: none; }
+    .card:hover { transform: none; box-shadow: none; border-color: var(--line); }
+    .pill { display: inline-block; background: var(--brand2); color: var(--stockton-blue-dark); padding: 4px 10px; border-radius: 999px; font-size: .85rem; font-weight: 600; }
+    .toplink { font-size: .92rem; margin-top: 1rem; display: inline-block; }
+    .contacts { display: grid; gap: 1.25rem; }
+    .contact { border: 1px solid var(--line); border-radius: var(--radius); padding: 1.5rem; background: var(--card); }
+    code { background: var(--brand2); padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono); font-size: 0.9em; }
+    
+    @media (max-width: 760px) {
+      .two { grid-template-columns: 1fr; }
+      section { padding: 1.5rem; }
+      .eof-hero { padding: 1.5rem; }
+    }
   </style>
 </head>
 <body>
-  <a className="skip" href="#main">Skip to content</a>
+  <a href="#main" class="skip-link">Skip to main content</a>
+  
+  <header>
+    <div class="container header-inner">
+      <div class="header-brand">
+        <div class="stockton-logo">
+          <img src="../images/stockton-logo.png" alt="Stockton University">
+        </div>
+        <div class="header-title">
+          <h1>Financial Aid Toolkit</h1>
+          <p>Stockton University Office of Financial Aid</p>
+        </div>
+      </div>
+      <div class="header-nav">
+        <a href="../index.html">← Back to Toolkit</a>
+      </div>
+    </div>
+  </header>
+
   <div id="root"></div>
+
+  <div class="brand-bar">
+    Stockton University • Financial Aid Office • <a href="https://stockton.edu/financial-aid/">Official Website</a>
+  </div>
 
   <script type="text/babel">
     function SectionTitle({ id, eyebrow, title, children }) {
@@ -79,32 +190,28 @@
 
     function App() {
       return (
-        <>
-          <header>
-            <div className="wrap hero">
-              <div>
-                <h1>Stockton University EOF Guide</h1>
-                <p>
-                  A simple, student-friendly overview of Stockton’s Educational Opportunity Fund program:
-                  what it is, who qualifies, how to apply, and what happens after admission.
-                </p>
-              </div>
-              <nav aria-label="Page sections">
-                <a href="#intro">Intro</a>
-                <a href="#eligibility">Eligibility</a>
-                <a href="#income">Income limits</a>
-                <a href="#freshmen">Freshmen</a>
-                <a href="#transfers">Transfers</a>
-                <a href="#summer">Summer Academy</a>
-                <a href="#docs">Forms</a>
-                <a href="#expectations">Expectations</a>
-                <a href="#contacts">Contacts</a>
-                <a href="#faq">FAQ</a>
-              </nav>
-            </div>
-          </header>
+        <div className="wrap">
+          <div className="eof-hero">
+            <h1>Stockton University EOF Guide</h1>
+            <p>
+              A simple, student-friendly overview of Stockton’s Educational Opportunity Fund program:
+              what it is, who qualifies, how to apply, and what happens after admission.
+            </p>
+            <nav className="eof-nav" aria-label="Page sections">
+              <a href="#intro">Intro</a>
+              <a href="#eligibility">Eligibility</a>
+              <a href="#income">Income limits</a>
+              <a href="#freshmen">Freshmen</a>
+              <a href="#transfers">Transfers</a>
+              <a href="#summer">Summer Academy</a>
+              <a href="#docs">Forms</a>
+              <a href="#expectations">Expectations</a>
+              <a href="#contacts">Contacts</a>
+              <a href="#faq">FAQ</a>
+            </nav>
+          </div>
 
-          <main id="main" className="wrap">
+          <main id="main">
             <Intro />
             <EligibilityOverview />
             <IncomeGuidelines />
@@ -116,7 +223,7 @@
             <ContactsAndCampuses />
             <FAQ />
           </main>
-        </>
+        </div>
       );
     }
 

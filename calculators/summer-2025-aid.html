@@ -4,169 +4,97 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Stockton University — Summer Financial Aid Estimator</title>
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  
-  :root {
-    --bg-color: #f5f5f3;
-    --text-color: #1a1a18;
-    --pill-bg: #E1F5EE;
-    --pill-text: #0F6E56;
-    --step-border: rgba(0,0,0,0.12);
-  }
-
-  body { 
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
-    background: var(--bg-color); 
-    min-height: 100vh; 
-    display: flex; 
-    justify-content: center; 
-    padding: 2rem 1rem; 
-    color: var(--text-color); 
-  }
-  
-  .calc-wrap { width: 100%; max-width: 640px; }
-
-  /* FIXED HEADER PILL */
-  .header-pill { 
-    display: flex; 
-    align-items: center; /* Vertically centers image and text together */
-    gap: 8px;             /* Adds clean spacing between logo and text */
-    background: var(--pill-bg); 
-    color: var(--pill-text); 
-    font-size: 12px; 
-    font-weight: 500; 
-    padding: 4px 12px; 
-    border-radius: 20px; 
-    margin-bottom: 1.25rem;
-    flex-wrap: wrap;     /* Prevents overflow on very small screens */
-  }
-
-  .header-pill img {
-    width: 36px;         /* Fixed size to match text height better */
-    height: auto;        /* Maintains aspect ratio */
-    display: block;      /* Removes default vertical margin/padding in inline elements */
-    flex-shrink: 0;      /* Prevents logo from squishing if content expands */
-  }
-
-  .header-pill-text {
-    line-height: 1.25;   /* Ensures text doesn't wrap awkwardly below the logo line */
-  }
-
-  h2 { font-size: 22px; font-weight: 500; color: var(--text-color); margin-bottom: 0.25rem; }
-  .sub { font-size: 14px; color: #666; margin-bottom: 1.75rem; }
-
-  /* Step Styling */
-  .step { background: #fff; border: 0.5px solid var(--step-border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 12px; }
-  
-  .step-label { font-size: 12px; font-weight: 500; color: #1D9E75; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 8px; }
-  .step-title { font-size: 15px; font-weight: 500; color: var(--text-color); margin-bottom: 12px; }
-
-  /* Smooth Reveal Animation for Steps */
-  @keyframes slideDownFade {
-    from { opacity: 0; transform: translateY(-10px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  
-  #pell-step, #tag-step, #summary-step {
-    animation: slideDownFade 0.4s ease-out;
-  }
-
-  /* Input Styling */
-  .field-row { display: flex; align-items: center; gap: 12px; }
-  
-  .num-input { 
-    width: 140px; 
-    font-size: 16px; 
-    font-weight: 500; 
-    padding: 8px 12px; 
-    border: 0.5px solid rgba(0,0,0,0.2); 
-    border-radius: 8px; 
-    background: var(--bg-color); 
-    color: var(--text-color);
-  }
-
-  .num-input:focus { outline: none; border-color: #1D9E75; box-shadow: 0 0 0 2px rgba(29,158,117,0.15); }
-  
-  /* Hide number input spinners */
-  .num-input::-webkit-inner-spin-button, 
-  .num-input::-webkit-outer-spin-button { 
-    -webkit-appearance: none; 
-    margin: 0; 
-  }
-  .num-input {
-    -moz-appearance: textfield;
-  }
-
-  .field-note { font-size: 13px; color: #666; }
-
-  /* Badges */
-  .load-badge { 
-    display: inline-block; 
-    font-size: 12px; 
-    font-weight: 500; 
-    padding: 3px 10px; 
-    border-radius: 20px; 
-    margin-top: 8px;
-  }
-
-  .load-ft   { background: var(--pill-bg); color: var(--pill-text); }
-  .load-tqt  { background: #E6F1FB; color: #185FA5; }
-  .load-ht   { background: #FAEEDA; color: #854F0B; }
-  .load-none { background: #FCEBEB; color: #A32D2D; }
-
-  /* Cost Display */
-  .cost-display { display: flex; align-items: baseline; gap: 8px; margin-top: 8px; }
-  .cost-amount { font-size: 28px; font-weight: 500; color: var(--text-color); }
-  .cost-label { font-size: 13px; color: #666; }
-
-  /* Helper Text */
-  .helper-text { font-size: 12px; color: #999; margin-top: 6px; }
-
-  /* Info Box */
-  .info-box { 
-    margin-top: 12px; 
-    padding: 12px; 
-    background: var(--bg-color); 
-    border-radius: 8px; 
-  }
-
-  .info-row { display: flex; justify-content: space-between; font-size: 13px; color: #666; padding: 3px 0; }
-  
-  .info-value-green { font-size: 18px; font-weight: 500; color: #0F6E56; }
-  .info-value-blue  { font-size: 18px; font-weight: 500; color: #185FA5; }
-
-  /* Summary Card */
-  .summary-card { background: var(--bg-color); border-radius: 12px; padding: 1.25rem 1.5rem; margin-top: 4px; }
-  
-  .summary-row { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 0; font-size: 14px; }
-  .summary-label { color: #666; }
-  .summary-value { font-weight: 500; color: var(--text-color); }
-
-  .summary-deduct-green { font-weight: 500; color: #0F6E56; }
-  .summary-deduct-blue  { font-weight: 500; color: #185FA5; }
-
-  .summary-total-row { display: flex; justify-content: space-between; align-items: baseline; padding-top: 10px; margin-top: 6px; border-top: 0.5px solid var(--step-border); }
-  .summary-total-label { font-size: 15px; font-weight: 500; color: var(--text-color); }
-  .summary-total-value { font-size: 24px; font-weight: 500; color: var(--text-color); }
-
-</style>
+  <link rel="stylesheet" href="../css/stockton-theme.css">
+  <style>
+    .calc-wrap { width: 100%; max-width: 640px; margin: 2rem auto 4rem; }
+    .step { background: #fff; border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; margin-bottom: 16px; box-shadow: var(--shadow-sm); }
+    .step-label { font-size: 12px; font-weight: 500; color: var(--stockton-blue); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 8px; }
+    .step-title { font-size: 16px; font-weight: 600; color: var(--stockton-blue-dark); margin-bottom: 12px; }
+    .sub { font-size: 14px; color: var(--text-muted); margin-bottom: 1.75rem; }
+    h2 { font-size: 24px; font-weight: 600; color: var(--stockton-blue-dark); margin-top: 1rem; margin-bottom: 0.5rem; }
+    
+    .field-row { display: flex; align-items: center; gap: 12px; }
+    .num-input { 
+      width: 140px; 
+      font-size: 16px; 
+      font-weight: 500; 
+      padding: 8px 12px; 
+      border: 1px solid var(--border-color); 
+      border-radius: 6px; 
+      background: var(--bg-color); 
+      color: var(--text-primary);
+    }
+    .num-input:focus { outline: none; border-color: var(--stockton-blue); box-shadow: 0 0 0 3px rgba(0, 105, 170, 0.15); }
+    .num-input::-webkit-inner-spin-button, .num-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    .num-input { -moz-appearance: textfield; }
+    
+    .field-note { font-size: 13px; color: var(--text-muted); }
+    
+    .load-badge { 
+      display: inline-block; 
+      font-size: 12px; 
+      font-weight: 600; 
+      padding: 4px 10px; 
+      border-radius: 20px; 
+      margin-top: 8px;
+    }
+    .load-ft   { background: var(--color-success-bg); color: var(--color-success); border: 1px solid rgba(18,122,58,0.15); }
+    .load-tqt  { background: var(--stockton-blue-light); color: var(--stockton-blue-dark); border: 1px solid var(--border-color); }
+    .load-ht   { background: var(--color-warning-bg); color: var(--color-warning); border: 1px solid rgba(138,90,0,0.15); }
+    .load-none { background: var(--color-error-bg); color: var(--color-error); border: 1px solid rgba(183,28,28,0.15); }
+    
+    .cost-display { display: flex; align-items: baseline; gap: 8px; margin-top: 8px; }
+    .cost-amount { font-size: 28px; font-weight: 700; color: var(--stockton-blue); }
+    .cost-label { font-size: 13px; color: var(--text-muted); }
+    
+    .helper-text { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+    
+    .info-box { 
+      margin-top: 12px; 
+      padding: 12px; 
+      background: var(--bg-color); 
+      border-radius: 8px; 
+      border: 1px solid var(--border-color);
+    }
+    .info-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); padding: 3px 0; }
+    .info-value-green { font-size: 16px; font-weight: 600; color: var(--color-success); }
+    .info-value-blue  { font-size: 16px; font-weight: 600; color: var(--stockton-blue); }
+    
+    .summary-card { background: var(--bg-color); border-radius: var(--radius-card); padding: 1.25rem 1.5rem; margin-top: 4px; border: 1px solid var(--border-color); }
+    .summary-row { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 0; font-size: 14px; }
+    .summary-label { color: var(--text-muted); }
+    .summary-value { font-weight: 600; color: var(--text-primary); }
+    .summary-deduct-green { font-weight: 600; color: var(--color-success); }
+    .summary-deduct-blue  { font-weight: 600; color: var(--stockton-blue); }
+    .summary-total-row { display: flex; justify-content: space-between; align-items: baseline; padding-top: 10px; margin-top: 6px; border-top: 1px solid var(--border-color); }
+    .summary-total-label { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+    .summary-total-value { font-size: 24px; font-weight: 700; color: var(--stockton-blue-dark); }
+  </style>
 </head>
 <body>
-<div class="calc-wrap">
-  <div class="header-pill">
-    <!-- LOGO INTEGRATED HERE -->
-    <img src="https://stockton.edu/relations/brand-guide/images/seal-color.png" alt="Stockton University Seal">
-    
-    <!-- Text Wrapper for Better Spacing Control -->
-    <div class="header-pill-text">
-      <span>Stockton University</span>
-      <span style="font-size: 12px; font-weight: 400;">Summer 2025–26</span>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
+  <header>
+    <div class="container header-inner">
+      <div class="header-brand">
+        <div class="stockton-logo">
+          <img src="../images/stockton-logo.png" alt="Stockton University">
+        </div>
+        <div class="header-title">
+          <h1>Financial Aid Toolkit</h1>
+          <p>Stockton University Office of Financial Aid</p>
+        </div>
+      </div>
+      <div class="header-nav">
+        <a href="../index.html">← Back to Toolkit</a>
+      </div>
     </div>
-  </div>
-
-  <h2>Summer financial aid estimator</h2>
-  <p class="sub">Estimate your summer tuition cost, Pell, and TAG award.</p>
+  </header>
+  
+  <main id="main-content" class="container">
+    <div class="calc-wrap">
+      <h2>Summer financial aid estimator</h2>
+      <p class="sub">Estimate your summer tuition cost, Pell, and TAG award.</p>
 
   <div class="step">
     <div class="step-label">Step 1</div>
@@ -220,8 +148,11 @@
         <span class="summary-total-value" id="s-total">—</span>
       </div>
     </div>
+  </main>
+
+  <div class="brand-bar">
+    Stockton University • Financial Aid Office • <a href="https://stockton.edu/financial-aid/">Official Website</a>
   </div>
-</div>
 
 <script>
 const TAG_TABLE = [
