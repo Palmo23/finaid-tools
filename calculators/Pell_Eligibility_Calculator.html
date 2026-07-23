@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pell Grant Eligibility Calculator — Stockton University</title>
+    <link rel="stylesheet" href="../css/stockton-theme.css">
+    <!-- Load React 18 and ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- Load Babel to compile JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <header>
+      <div class="container header-inner">
+        <div class="header-brand">
+          <div class="stockton-logo">
+            <img src="../images/stockton-logo.png" alt="Stockton University">
+          </div>
+          <div class="header-title">
+            <h1>Financial Aid Toolkit</h1>
+            <p>Stockton University Office of Financial Aid</p>
+          </div>
+        </div>
+        <div class="header-nav">
+          <a href="../index.html">← Back to Toolkit</a>
+        </div>
+      </div>
+    </header>
+
+    <main id="main-content" class="container">
+      <div id="root"></div>
+    </main>
+
+    <div class="brand-bar">
+      Stockton University • Financial Aid Office • <a href="https://stockton.edu/financial-aid/">Official Website</a>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useMemo } = React;
+        const MAX_ELIGIBILITY = 600;
+        const EXHAUSTED_THRESHOLD = 599.99;
+        const MAX_PELL = 7395;
+        const MIN_PELL = 739.50;
+
+        // Credit-hour → enrollment intensity
+        // Federal formula: intensity = min(credits, 12) / 12
+        // Per-semester lifetime deduction = intensity × 50%
+        function getEnrollmentFromCredits(credits) {
+          if (!credits || isNaN(credits) || credits < 1 || credits > 30) return null;
+          const c = Math.min(Math.floor(credits), 12);
+          const awardRatio = c / 12;
+          const deduction = (c / 12) * 50;
+          const pct = Math.round(awardRatio * 100);
+          let category, categoryLabel;
+          if (credits >= 12)     { category = "full";         categoryLabel = "Full-time"; }
+          else if (credits >= 9) { category = "three-quarter"; categoryLabel = "Three-quarter time"; }
+          else if (credits >= 6) { category = "half";          categoryLabel = "Half-time"; }
+          else                   { category = "less";          categoryLabel = "Less than half-time"; }
+          const label = credits >= 12
+            ? `Full-time (12+ credits) — 100%`
+            : `${categoryLabel} (${Math.floor(credits)} credits) — ${pct}%`;
+          return { credits: Math.floor(credits), awardRatio, deduction, label, category, categoryLabel, pct };
+        }
+
+        function clamp(val, min, max) { return Math.min(Math.max(val, min), max); }
+        function roundToNearest5(n) { return Math.round(n / 5) * 5; }
+        function fmt$(n) { return n.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2 }); }
+
+        function getStatusColor(pct) {
+          if (pct >= EXHAUSTED_THRESHOLD) return { bar: "var(--color-error)", bg: "var(--color-error-bg)", text: "var(--color-error)", border: "rgba(183, 28, 28, 0.3)", label: "Exhausted" };
+          if (pct >= 500) return { bar: "var(--color-warning)", bg: "var(--color-warning-bg)", text: "var(--color-warning)", border: "rgba(138, 90, 0, 0.3)", label: "Critical" };
+          if (pct >= 400) return { bar: "var(--color-warning)", bg: "var(--color-warning-bg)", text: "var(--color-warning)", border: "rgba(138, 90, 0, 0.3)", label: "Warning" };
+          if (pct >= 300) return { bar: "var(--stockton-blue)", bg: "var(--stockton-blue-light)", text: "var(--stockton-blue-dark)", border: "var(--border-color)", label: "Moderate" };
+          return { bar: "var(--color-success)", bg: "var(--color-success-bg)", text: "var(--color-success)", border: "rgba(18, 122, 58, 0.3)", label: "Good standing" };
+        }
+
+        function calcPellAward(sai) {
+          if (sai === null) return null;
+          if (sai <= 0) return { type: "maximum", scheduledAward: MAX_PELL, note: `SAI ≤ 0 — student qualifies for the maximum Pell Grant of ${fmt$(MAX_PELL)}.` };
+          const calculated = MAX_PELL - sai;
+          const rounded = roundToNearest5(calculated);
+          if (rounded < MIN_PELL) return { type: "ineligible", scheduledAward: 0, note: `Calculated amount (${fmt$(MAX_PELL)} − ${fmt$(sai)} = ${fmt$(calculated)}) falls below the minimum Pell threshold of ${fmt$(MIN_PELL)}.` };
+          return { type: "calculated", scheduledAward: rounded, note: `${fmt$(MAX_PELL)} − ${fmt$(sai)} = ${fmt$(calculated)}, rounded to nearest $5 = ${fmt$(rounded)}.` };
+        }
+
+        function prorateSemesterAward(scheduledAward, awardRatio, remainingPct, deduction) {
+          const semBase = scheduledAward / 2;
+          const fullAward = Math.ceil(semBase * awardRatio);
+          if (remainingPct <= 0) return { award: 0, isPartial: false };
+          if (remainingPct >= deduction) return { award: fullAward, isPartial: false };
+          const partialRatio = remainingPct / deduction;
+          return { award: Math.ceil(fullAward * partialRatio), isPartial: true, pct: (partialRatio * 100).toFixed(1) };
+        }
+
+        function ProgressBar({ current }) {
+          const fillPct = clamp((current / MAX_ELIGIBILITY) * 100, 0, 100);
+          const status = getStatusColor(current);
+          return (
+            <div>
+              <div style={{ position: "relative", height: 28, borderRadius: "var(--radius-btn)", background: "var(--bg-color)", border: "1px solid var(--border-color)", overflow: "hidden" }}>
+                <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${fillPct}%`, background: status.bar, borderRadius: "var(--radius-btn)", transition: "width 0.4s cubic-bezier(.4,0,.2,1), background 0.3s", minWidth: current > 0 ? 4 : 0 }} />
+                {[300, 400, 500].map(mark => (
+                  <div key={mark} style={{ position: "absolute", left: `${(mark / MAX_ELIGIBILITY) * 100}%`, top: 0, bottom: 0, width: 1, background: "var(--border-color)", opacity: 0.7 }} />
+                ))}
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
+                {[0, 25, 50, 75, 100].map(m => (
+                  <span key={m} style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}>{m * 6}%</span>
+                ))}
+              </div>
+            </div>
+          );
+        }
+
+        function MetricCard({ label, value, sub, accent, accentBg, accentText, accentBorder }) {
+          return (
+            <div style={{ background: accent ? accentBg : "var(--card-bg)", border: `1px solid ${accent ? accentBorder : "var(--border-color)"}`, borderRadius: "var(--radius-card)", padding: "1rem 1.25rem", flex: 1, minWidth: 140, boxShadow: "var(--shadow-sm)" }}>
+              <p style={{ fontSize: 11, color: accent ? accentText : "var(--text-muted)", margin: "0 0 4px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</p>
+              <p style={{ fontSize: 22, fontWeight: 700, color: accent ? accentText : "var(--stockton-blue-dark)", margin: 0, fontFamily: "var(--font-mono)", lineHeight: 1.2 }}>{value}</p>
+              {sub && <p style={{ fontSize: 12, color: accent ? accentText : "var(--text-muted)", margin: "4px 0 0", opacity: accent ? 0.9 : 1 }}>{sub}</p>}
+            </div>
+          );
+        }
+
+        function AwardTypeBadge({ type }) {
+          const map = {
+            maximum: { label: "Maximum Pell", bg: "var(--color-success-bg)", text: "var(--color-success)", border: "rgba(18, 122, 58, 0.3)" },
+            calculated: { label: "Calculated Pell", bg: "var(--stockton-blue-light)", text: "var(--stockton-blue-dark)", border: "var(--border-color)" },
+            ineligible: { label: "Not eligible for Pell", bg: "var(--color-error-bg)", text: "var(--color-error)", border: "rgba(183, 28, 28, 0.3)" },
+          };
+          const s = map[type];
+          return <span style={{ fontSize: 12, fontWeight: 600, padding: "4px 10px", borderRadius: "var(--radius-btn)", background: s.bg, color: s.text, border: `1px solid ${s.border}` }}>{s.label}</span>;
+        }
+
+        function Alert({ type, title, body }) {
+          const isError = type === "error";
+          const className = isError ? "callout danger" : "callout warning";
+          return (
+            <div className={className} style={{ marginBottom: "1.25rem" }}>
+              <h4 style={{ fontSize: "1.05rem", fontWeight: 600, marginBottom: "0.25rem" }}>{title}</h4>
+              <p style={{ fontSize: "0.925rem", margin: 0, lineHeight: 1.5 }}>{body}</p>
+            </div>
+          );
+        }
+
+        function Divider({ label }) {
+          return (
+            <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "1.75rem 0 1.25rem" }}>
+              <div style={{ flex: 1, height: "1px", background: "var(--border-color)" }} />
+              <span style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.07em", color: "var(--text-muted)", whiteSpace: "nowrap" }}>{label}</span>
+              <div style={{ flex: 1, height: "1px", background: "var(--border-color)" }} />
+            </div>
+          );
+        }
+
+        function AwardCard({ pellResult, enrollmentOption, remaining, deduction }) {
+          if (!pellResult) return null;
+          const { scheduledAward, type, note } = pellResult;
+          if (type === "ineligible") {
+            return (
+              <div className="callout danger" style={{ borderRadius: "var(--radius-card)", padding: "1.25rem", marginBottom: "1.25rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                  <AwardTypeBadge type="ineligible" />
+                </div>
+                <p style={{ fontSize: 14, color: "var(--color-error)", margin: 0, fontWeight: 500 }}>{note}</p>
+                <p style={{ fontSize: 12, color: "var(--color-error)", margin: "8px 0 0", opacity: 0.9 }}>
+                  The student's SAI produces a calculated Pell amount below the {fmt$(MIN_PELL)} minimum. No Pell Grant will be awarded based on SAI formula alone. Other eligibility pathways (maximum Pell) are not affected by this calculation.
+                </p>
+              </div>
+            );
+          }
+
+          const semBase = scheduledAward / 2;
+          const fullAward = Math.ceil(semBase * enrollmentOption.awardRatio);
+          const hasPartialSem = remaining > 0 && remaining < deduction;
+          const prorated = hasPartialSem ? prorateSemesterAward(scheduledAward, enrollmentOption.awardRatio, remaining, deduction) : null;
+          const semesterAward = hasPartialSem ? prorated.award : fullAward;
+
+          return (
+            <div style={{ background: "var(--card-bg)", border: "1px solid var(--border-color)", borderRadius: "var(--radius-card)", padding: "1.25rem", marginBottom: "1.25rem", boxShadow: "var(--shadow-sm)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: 8 }}>
+                <p style={{ fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.07em", color: "var(--text-muted)", margin: 0 }}>2026–2027 Pell Grant award</p>
+                <AwardTypeBadge type={type} />
+              </div>
+
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: "1rem" }}>
+                <div style={{ flex: 1, minWidth: 140, background: "var(--bg-color)", borderRadius: "var(--radius-btn)", padding: "12px 14px", border: "1px solid var(--border-color)" }}>
+                  <p style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-muted)", margin: "0 0 4px" }}>Scheduled annual award</p>
+                  <p style={{ fontSize: 20, fontWeight: 700, color: "var(--stockton-blue-dark)", margin: 0, fontFamily: "var(--font-mono)" }}>{fmt$(scheduledAward)}</p>
+                  <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "2px 0 0" }}>Annual amount (both semesters)</p>
+                </div>
+
+                <div style={{ flex: 1, minWidth: 140, background: "var(--stockton-blue-light)", borderRadius: "var(--radius-btn)", padding: "12px 14px", border: "1px solid var(--border-color)" }}>
+                  <p style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--stockton-blue-dark)", margin: "0 0 4px" }}>
+                    This semester{hasPartialSem ? " (prorated)" : ` — ${enrollmentOption.categoryLabel}`}
+                  </p>
+                  <p style={{ fontSize: 20, fontWeight: 700, color: "var(--stockton-blue)", margin: 0, fontFamily: "var(--font-mono)" }}>{fmt$(semesterAward)}</p>
+                  <p style={{ fontSize: 12, color: "var(--stockton-blue-dark)", margin: "2px 0 0", opacity: 0.85 }}>
+                    {hasPartialSem
+                      ? `${prorated.pct}% of ${enrollmentOption.categoryLabel.toLowerCase()} award`
+                      : `${(enrollmentOption.awardRatio * 100).toFixed(0)}% of scheduled award`}
+                  </p>
+                </div>
+
+                {hasPartialSem && (
+                  <div style={{ flex: 1, minWidth: 140, background: "var(--color-warning-bg)", borderRadius: "var(--radius-btn)", padding: "12px 14px", border: "1px solid rgba(138,90,0,0.2)" }}>
+                    <p style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--color-warning)", margin: "0 0 4px" }}>Without proration</p>
+                    <p style={{ fontSize: 20, fontWeight: 700, color: "var(--color-warning)", margin: 0, fontFamily: "var(--font-mono)" }}>{fmt$(fullAward)}</p>
+                    <p style={{ fontSize: 12, color: "var(--color-warning)", margin: "2px 0 0", opacity: 0.85 }}>Full {enrollmentOption.categoryLabel.toLowerCase()} semester</p>
+                  </div>
+                )}
+              </div>
+
+              <div style={{ background: "var(--bg-color)", borderRadius: "var(--radius-btn)", padding: "10px 12px", border: "1px solid var(--border-color)" }}>
+                <p style={{ fontSize: 13, color: "var(--text-primary)", margin: 0, lineHeight: 1.6 }}>
+                  <span style={{ fontWeight: 600, color: "var(--stockton-blue-dark)" }}>Calculation: </span>{note}
+                  {` Per-semester base: ${fmt$(semBase)}. Adjusted for ${enrollmentOption.categoryLabel.toLowerCase()} enrollment (${(enrollmentOption.awardRatio * 100).toFixed(0)}% of semester base) = ${fmt$(fullAward)} (rounded up to nearest dollar).`}
+                  {hasPartialSem && ` Prorated: ${remaining.toFixed(2)}% remaining ÷ ${deduction.toFixed(2)}% full-semester deduction = ${prorated.pct}% of semester award = ${fmt$(semesterAward)}.`}
+                </p>
+              </div>
+            </div>
+          );
+        }
+
+        function ProjectionTable({ rows, deduction, pellResult, enrollmentOption }) {
+          if (!rows.length) return null;
+          const showAward = pellResult && pellResult.type !== "ineligible";
+          return (
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ margin: 0 }}>
+                <thead>
+                  <tr>
+                    {["Sem.", "Deduction", "Cumulative", "Remaining", ...(showAward ? ["Est. award"] : []), "Status"].map(h => (
+                      <th key={h} style={{ whiteSpace: "nowrap" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((row, i) => {
+                    const s = getStatusColor(row.after);
+                    const isLast = i === rows.length - 1;
+                    let awardCell = null;
+                    if (showAward) {
+                      const p = prorateSemesterAward(pellResult.scheduledAward, enrollmentOption.awardRatio, row.prevRemaining, deduction);
+                      awardCell = (
+                        <td>
+                          <span style={{ fontFamily: "var(--font-mono)", color: p.isPartial ? "var(--color-warning)" : "var(--text-primary)", fontWeight: p.isPartial ? 600 : 400, fontSize: 13 }}>
+                            {fmt$(p.award)}{p.isPartial ? " *" : ""}
+                          </span>
+                        </td>
+                      );
+                    }
+                    return (
+                      <tr key={i} style={{ background: isLast && row.after >= EXHAUSTED_THRESHOLD ? "var(--color-error-bg)" : "transparent" }}>
+                        <td style={{ fontWeight: 600, color: "var(--stockton-blue-dark)", fontFamily: "var(--font-mono)", fontSize: 13 }}>{i + 1}</td>
+                        <td style={{ color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: 13, whiteSpace: "nowrap" }}>−{deduction.toFixed(2)}%</td>
+                        <td style={{ fontFamily: "var(--font-mono)", color: s.text, fontWeight: 600, fontSize: 13, whiteSpace: "nowrap" }}>{Math.min(row.after, 600).toFixed(2)}%</td>
+                        <td style={{ fontFamily: "var(--font-mono)", color: "var(--text-muted)", fontSize: 13, whiteSpace: "nowrap" }}>{row.remaining >= 0 ? row.remaining.toFixed(2) + "%" : "0.00%"}</td>
+                        {awardCell}
+                        <td>
+                          <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: "var(--radius-btn)", background: s.bg, color: s.text, border: `1px solid ${s.border}`, whiteSpace: "nowrap" }}>{s.label}</span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              {showAward && rows.some(r => r.isPartial) && (
+                <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "10px 0 0" }}>
+                  * Prorated — lifetime eligibility is exhausted before the end of this semester, so the award reflects only the usable portion.
+                </p>
+              )}
+            </div>
+          );
+        }
+
+        function PellGrantCalculator() {
+          const [currentPct, setCurrentPct] = useState("");
+          const [creditsInput, setCreditsInput] = useState("");
+          const [saiInput, setSaiInput] = useState("");
+          const [pctError, setPctError] = useState("");
+          const [creditsError, setCreditsError] = useState("");
+          const [saiError, setSaiError] = useState("");
+
+          const parsedCredits = parseInt(creditsInput, 10);
+          const enrollmentOption = getEnrollmentFromCredits(parsedCredits);
+          const deduction = enrollmentOption ? enrollmentOption.deduction : 50;
+          const awardRatio = enrollmentOption ? enrollmentOption.awardRatio : 1.0;
+
+          const parsedPct = parseFloat(currentPct);
+          const validCurrent = !isNaN(parsedPct) && parsedPct >= 0 && parsedPct <= 600;
+          const current = validCurrent ? parsedPct : 0;
+          const hasPctInput = currentPct !== "";
+
+          const parsedSai = saiInput !== "" ? parseFloat(saiInput) : null;
+          const validSai = parsedSai === null || (!isNaN(parsedSai) && parsedSai >= -1500);
+          const sai = validSai ? parsedSai : null;
+
+          const remaining = Math.max(MAX_ELIGIBILITY - current, 0);
+          const fullSemesters = remaining >= deduction ? Math.floor(remaining / deduction) : 0;
+          const partialPct = remaining % deduction;
+          const status = getStatusColor(current);
+          const isExhausted = current >= EXHAUSTED_THRESHOLD;
+          const hasPartialSem = !isExhausted && partialPct > 0;
+
+          const pellResult = useMemo(() => sai !== null && validSai ? calcPellAward(sai) : null, [sai, validSai]);
+
+          const semesterAward = useMemo(() => {
+            if (!pellResult || pellResult.type === "ineligible" || isExhausted) return null;
+            if (hasPartialSem) return prorateSemesterAward(pellResult.scheduledAward, awardRatio, remaining, deduction);
+            return { award: Math.ceil((pellResult.scheduledAward / 2) * awardRatio), isPartial: false };
+          }, [pellResult, awardRatio, remaining, deduction, hasPartialSem, isExhausted]);
+
+          const projection = useMemo(() => {
+            if (!validCurrent || isExhausted) return [];
+            const rows = [];
+            let running = current;
+            const total = Math.min(fullSemesters + (partialPct > 0 ? 1 : 0), 24);
+            for (let i = 0; i < total; i++) {
+              const prevRemaining = Math.max(MAX_ELIGIBILITY - running, 0);
+              const after = Math.min(running + deduction, 600);
+              const rem = Math.max(MAX_ELIGIBILITY - after, 0);
+              const isPartial = prevRemaining < deduction;
+              rows.push({ after, remaining: rem, prevRemaining, isPartial });
+              running = after;
+              if (after >= EXHAUSTED_THRESHOLD) break;
+            }
+            return rows;
+          }, [current, deduction, fullSemesters, partialPct, validCurrent, isExhausted]);
+
+          function handlePctInput(e) {
+            const val = e.target.value;
+            setCurrentPct(val);
+            const n = parseFloat(val);
+            setPctError(val !== "" && (isNaN(n) || n < 0 || n > 600) ? "Enter a value between 0 and 600" : "");
+          }
+
+          function handleCreditsInput(e) {
+            const val = e.target.value;
+            setCreditsInput(val);
+            const n = parseInt(val, 10);
+            if (val === "") { setCreditsError(""); return; }
+            if (isNaN(n) || n < 1 || n > 30) {
+              setCreditsError("Enter a credit count between 1 and 30");
+            } else {
+              setCreditsError("");
+            }
+          }
+
+          function handleSaiInput(e) {
+            const val = e.target.value;
+            setSaiInput(val);
+            const n = parseFloat(val);
+            setSaiError(val !== "" && (isNaN(n) || n < -1500) ? "SAI must be −1,500 or higher" : "");
+          }
+
+          return (
+            <div style={{ fontFamily: "var(--font-sans)", maxWidth: 760, margin: "2rem auto 4rem" }}>
+              <h2 style={{ fontSize: 24, fontWeight: 600, color: "var(--stockton-blue-dark)", marginTop: "1rem", marginBottom: "0.5rem" }}>Pell Grant Lifetime Eligibility Calculator</h2>
+              <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: "1.75rem" }}>
+                2026–2027 · Maximum Pell: {fmt$(MAX_PELL)} · Minimum Pell: {fmt$(MIN_PELL)} · Lifetime limit: 600%
+              </p>
+
+              <div style={{ background: "var(--card-bg)", border: "1px solid var(--border-color)", borderRadius: "var(--radius-card)", padding: "1.5rem", marginBottom: "1.5rem", boxShadow: "var(--shadow-sm)" }}>
+                <p style={{ fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.07em", color: "var(--stockton-blue)", margin: "0 0 1rem" }}>Student information</p>
+                <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+                  <div className="form-group" style={{ flex: "1 1 200px", margin: 0 }}>
+                    <label htmlFor="current-pct">Cumulative Pell usage (%)</label>
+                    <input id="current-pct" type="number" min="0" max="600" step="0.01" placeholder="e.g. 275.00" value={currentPct} onChange={handlePctInput}
+                      style={{ border: pctError ? "1px solid var(--color-error)" : undefined }} />
+                    {pctError && <p style={{ fontSize: 12, color: "var(--color-error)", margin: "4px 0 0" }}>{pctError}</p>}
+                  </div>
+                  <div className="form-group" style={{ flex: "1 1 200px", margin: 0 }}>
+                    <label htmlFor="credits-input">Credit hours enrolled</label>
+                    <input
+                      id="credits-input" type="number" min="1" max="30" step="1" placeholder="e.g. 12"
+                      value={creditsInput} onChange={handleCreditsInput}
+                      style={{ border: creditsError ? "1px solid var(--color-error)" : undefined }}
+                    />
+                    {creditsError
+                      ? <p style={{ fontSize: 12, color: "var(--color-error)", margin: "4px 0 0" }}>{creditsError}</p>
+                      : enrollmentOption
+                        ? <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "4px 0 0" }}>
+                            {enrollmentOption.categoryLabel} — {enrollmentOption.pct}% intensity · {enrollmentOption.deduction.toFixed(2)}%/sem deduction
+                          </p>
+                        : <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "4px 0 0" }}>12+ = full-time (100%), 6 = half-time (50%), 1–5 = less than half-time</p>
+                    }
+                  </div>
+                  <div className="form-group" style={{ flex: "1 1 200px", margin: 0 }}>
+                    <label htmlFor="sai-input">
+                      Student Aid Index (SAI)
+                      <span style={{ fontSize: 12, color: "var(--text-muted)", marginLeft: 6, fontWeight: 400 }}>(optional)</span>
+                    </label>
+                    <input id="sai-input" type="number" min="-1500" step="1" placeholder="e.g. 2000 or −1500" value={saiInput} onChange={handleSaiInput}
+                      style={{ border: saiError ? "1px solid var(--color-error)" : undefined }} />
+                    {saiError
+                      ? <p style={{ fontSize: 12, color: "var(--color-error)", margin: "4px 0 0" }}>{saiError}</p>
+                      : <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "4px 0 0" }}>Range: −1,500 (max Pell) to ~6,655 (min threshold)</p>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              {hasPctInput && validCurrent && enrollmentOption && (
+                <>
+                  {isExhausted && <Alert type="error" title="Pell Grant eligibility exhausted" body="This student has reached or exceeded the 600% lifetime limit and is no longer eligible to receive Federal Pell Grant funding." />}
+                  {!isExhausted && current >= 500 && <Alert type="warning" title="Approaching lifetime limit" body={`This student has used ${current.toFixed(2)}% of their lifetime Pell eligibility. Only ${remaining.toFixed(2)}% remains. Advise accordingly.`} />}
+
+                  <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: "1.5rem" }}>
+                    <MetricCard label="Current usage" value={`${current.toFixed(2)}%`} sub={`of ${MAX_ELIGIBILITY}% lifetime max`} accent accentBg={status.bg} accentText={status.text} accentBorder={status.border} />
+                    <MetricCard label="Remaining eligibility" value={`${remaining.toFixed(2)}%`} sub="available to use" />
+                    <MetricCard label="Full semesters left" value={isExhausted ? "0" : fullSemesters.toString()} sub={enrollmentOption ? `at ${enrollmentOption.categoryLabel.toLowerCase()} (${deduction.toFixed(1)}%/sem)` : `at full-time (50%/sem)`} />
+                    {semesterAward && (
+                      <MetricCard
+                        label="Semester award"
+                        value={fmt$(semesterAward.award)}
+                        sub={semesterAward.isPartial ? "Prorated — partial eligibility" : `${enrollmentOption.categoryLabel} (${enrollmentOption.pct}% intensity)`}
+                      />
+                    )}
+                  </div>
+
+                  <div style={{ background: "var(--card-bg)", border: "1px solid var(--border-color)", borderRadius: "var(--radius-card)", padding: "1.5rem", marginBottom: "1.5rem", boxShadow: "var(--shadow-sm)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                      <p style={{ fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.07em", color: "var(--stockton-blue)", margin: 0 }}>Lifetime usage</p>
+                      <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: "var(--radius-btn)", background: status.bg, color: status.text, border: `1px solid ${status.border}` }}>{status.label}</span>
+                    </div>
+                    <ProgressBar current={current} />
+                    {!isExhausted && hasPartialSem && (
+                      <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "10px 0 0" }}>
+                        After {fullSemesters} full semester{fullSemesters !== 1 ? "s" : ""}, {partialPct.toFixed(2)}% of eligibility remains — less than one full {enrollmentOption.categoryLabel.toLowerCase()} semester ({deduction.toFixed(2)}%). The final disbursement will be prorated.
+                      </p>
+                    )}
+                  </div>
+
+                  {pellResult && (
+                    <>
+                      <Divider label="Award calculation" />
+                      <AwardCard pellResult={pellResult} enrollmentOption={enrollmentOption} remaining={remaining} deduction={deduction} />
+                    </>
+                  )}
+
+                  {!isExhausted && projection.length > 0 && (
+                    <>
+                      <Divider label="Semester-by-semester projection" />
+                      <div style={{ background: "var(--card-bg)", border: "1px solid var(--border-color)", borderRadius: "var(--radius-card)", padding: "1.5rem", boxShadow: "var(--shadow-sm)" }}>
+                        <p style={{ fontSize: 13, color: "var(--text-primary)", margin: "0 0 1rem", lineHeight: 1.6 }}>
+                          Enrollment: <span style={{ fontWeight: 600, color: "var(--stockton-blue-dark)" }}>{enrollmentOption.categoryLabel} ({enrollmentOption.credits >= 12 ? "12+" : enrollmentOption.credits} credits, {enrollmentOption.pct}% intensity)</span> · {deduction.toFixed(2)}% deduction per semester
+                          {pellResult && pellResult.type !== "ineligible" && <> · Scheduled annual award: <span style={{ fontWeight: 600, color: "var(--stockton-blue-dark)" }}>{fmt$(pellResult.scheduledAward)}</span></>}
+                        </p>
+                        <ProjectionTable rows={projection} deduction={deduction} pellResult={pellResult} enrollmentOption={enrollmentOption} />
+                        {projection.length === 24 && <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "10px 0 0" }}>Showing first 24 semesters.</p>}
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
+
+              {(!hasPctInput || !enrollmentOption) && (
+                <div style={{ background: "var(--card-bg)", border: "1px solid var(--border-color)", borderRadius: "var(--radius-card)", padding: "2.5rem 1.5rem", textAlign: "center", boxShadow: "var(--shadow-sm)" }}>
+                  <p style={{ fontSize: 14, color: "var(--text-muted)", margin: 0 }}>Enter a cumulative Pell percentage and credit hours to see eligibility details, award calculations, and projections.</p>
+                </div>
+              )}
+
+              <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "1.5rem 0 0", textAlign: "center" }}>
+                2026–2027 Federal Student Aid guidelines · Intensity = credit hours ÷ 12 (max 100%) · 12+ credits = full-time (50%/sem) · 6 credits = half-time (25%/sem) · Awards rounded up to nearest dollar
+              </p>
+            </div>
+          );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<PellGrantCalculator />);
+    </script>
+</body>
+</html>
