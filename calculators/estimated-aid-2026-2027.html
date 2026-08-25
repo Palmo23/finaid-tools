@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2026–2027 Estimated Aid Calculator — Stockton University</title>
+  <link rel="stylesheet" href="../css/stockton-theme.css">
+  <!-- Load React 18 and ReactDOM -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <!-- Load Babel to compile JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <header>
+    <div class="container header-inner">
+      <div class="header-brand">
+        <div class="stockton-logo">
+          <img src="../images/stockton-logo.png" alt="Stockton University">
+        </div>
+        <div class="header-title">
+          <h1>Financial Aid Toolkit</h1>
+          <p>Stockton University Office of Financial Aid</p>
+        </div>
+      </div>
+      <div class="header-nav">
+        <a href="../index.html">← Back to Toolkit</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content" class="container">
+    <div id="root"></div>
+  </main>
+
+  <div class="brand-bar">
+    Stockton University • Financial Aid Office • <a href="https://stockton.edu/financial-aid/">Official Website</a>
+  </div>
+
+  <script type="text/babel">
+    const { useState, useMemo } = React;
+
+    // Constants based on HESAA 2026-27 Schedule & Federal Guidelines
+    const MAX_PELL = 7395;
+    const MIN_PELL = 739.50;
+    const ORIGINATION_FEE_RATE = 0.01057; // 1.057%
+
+    // 2026-2027 Stockton University Tuition Aid Grant (TAG) Schedule (Attachment B)
+    const TAG_TABLE = [
+      { min: -Infinity, max: 1499, label: "Under 1500", annual: 9496, fall: 4748, spring: 4748 },
+      { min: 1500, max: 2499, label: "1500 – 2499", annual: 7922, fall: 3961, spring: 3961 },
+      { min: 2500, max: 3499, label: "2500 – 3499", annual: 6706, fall: 3353, spring: 3353 },
+      { min: 3500, max: 4499, label: "3500 – 4499", annual: 5554, fall: 2777, spring: 2777 },
+      { min: 4500, max: 5499, label: "4500 – 5499", annual: 4604, fall: 2302, spring: 2302 },
+      { min: 5500, max: 6499, label: "5500 – 6499", annual: 3594, fall: 1797, spring: 1797 },
+      { min: 6500, max: 7499, label: "6500 – 7499", annual: 2616, fall: 1308, spring: 1308 },
+      { min: 7500, max: Infinity, label: "7500+", annual: 0, fall: 0, spring: 0 }
+    ];
+
+    function fmt$(val) {
+      if (val === null || val === undefined || isNaN(val)) return "$0.00";
+      return val.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function fmtWhole$(val) {
+      if (val === null || val === undefined || isNaN(val)) return "$0";
+      return val.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    }
+
+    function calcTag(njeiInput) {
+      if (njeiInput === "" || njeiInput === null || isNaN(Number(njeiInput))) {
+        return null;
+      }
+      const val = Math.floor(Number(njeiInput));
+      const match = TAG_TABLE.find(row => val >= row.min && val <= row.max);
+      return match || { min: 7500, max: Infinity, label: "7500+", annual: 0, fall: 0, spring: 0 };
+    }
+
+    function calcPell(saiInput) {
+      if (saiInput === "" || saiInput === null || isNaN(Number(saiInput))) {
+        return null;
+      }
+      const sai = Math.floor(Number(saiInput));
+
+      if (sai > MAX_PELL) {
+        return {
+          annual: 0,
+          fall: 0,
+          spring: 0,
+          status: "ineligible",
+          note: `SAI of ${sai} exceeds maximum eligibility threshold (${MAX_PELL}). Not eligible for Federal Pell Grant.`
+        };
+      }
+
+      if (sai <= 0) {
+        const fall = 3698;
+        const spring = 3697;
+        return {
+          annual: MAX_PELL,
+          fall,
+          spring,
+          status: "maximum",
+          note: `SAI ≤ 0 qualifies for the Maximum Federal Pell Grant of ${fmtWhole$(MAX_PELL)}.`
+        };
+      }
+
+      // Calculated Pell: 7395 - SAI, rounded to nearest $5
+      const calculated = MAX_PELL - sai;
+      const rounded = Math.round(calculated / 5) * 5;
+
+      if (rounded < MIN_PELL) {
+        return {
+          annual: 0,
+          fall: 0,
+          spring: 0,
+          status: "ineligible",
+          note: `Calculated amount (${fmtWhole$(MAX_PELL)} − ${fmtWhole$(sai)} = ${fmtWhole$(calculated)}) rounded to ${fmtWhole$(rounded)} falls below minimum threshold of ${fmt$(MIN_PELL)}.`
+        };
+      }
+
+      const fall = Math.ceil(rounded / 2);
+      const spring = rounded - fall;
+
+      return {
+        annual: rounded,
+        fall,
+        spring,
+        status: "calculated",
+        note: `Calculated award: ${fmtWhole$(MAX_PELL)} − ${fmtWhole$(sai)} = ${fmtWhole$(calculated)}, rounded to nearest $5 = ${fmtWhole$(rounded)}.`
+      };
+    }
+
+    function calcLoan(acceptedGross) {
+      const gross = Math.max(0, Number(acceptedGross) || 0);
+      if (gross <= 0) {
+        return {
+          annualGross: 0,
+          fallGross: 0,
+          springGross: 0,
+          annualFee: 0,
+          fallFee: 0,
+          springFee: 0,
+          annualNet: 0,
+          fallNet: 0,
+          springNet: 0
+        };
+      }
+
+      const fallGross = gross / 2;
+      const springGross = gross / 2;
+
+      // 1.057% origination fee per semester
+      const fallFee = fallGross * ORIGINATION_FEE_RATE;
+      const springFee = springGross * ORIGINATION_FEE_RATE;
+      const annualFee = fallFee + springFee;
+
+      const fallNet = fallGross - fallFee;
+      const springNet = springGross - springFee;
+      const annualNet = fallNet + springNet;
+
+      return {
+        annualGross: gross,
+        fallGross,
+        springGross,
+        annualFee,
+        fallFee,
+        springFee,
+        annualNet,
+        fallNet,
+        springNet
+      };
+    }
+
+    function App() {
+      // Inputs
+      const [njei, setNjei] = useState("1200");
+      const [sai, setSai] = useState("0");
+      const [subLoan, setSubLoan] = useState("3500");
+      const [unsubLoan, setUnsubLoan] = useState("2000");
+      const [showTagSchedule, setShowTagSchedule] = useState(false);
+
+      // Calculations
+      const tagResult = useMemo(() => calcTag(njei), [njei]);
+      const pellResult = useMemo(() => calcPell(sai), [sai]);
+      const subResult = useMemo(() => calcLoan(subLoan), [subLoan]);
+      const unsubResult = useMemo(() => calcLoan(unsubLoan), [unsubLoan]);
+
+      // Totals
+      const totalGrantsAnnual = (tagResult ? tagResult.annual : 0) + (pellResult ? pellResult.annual : 0);
+      const totalGrantsFall = (tagResult ? tagResult.fall : 0) + (pellResult ? pellResult.fall : 0);
+      const totalGrantsSpring = (tagResult ? tagResult.spring : 0) + (pellResult ? pellResult.spring : 0);
+
+      const totalLoansGrossAnnual = subResult.annualGross + unsubResult.annualGross;
+      const totalLoansFeesAnnual = subResult.annualFee + unsubResult.annualFee;
+      const totalLoansNetAnnual = subResult.annualNet + unsubResult.annualNet;
+
+      const totalLoansNetFall = subResult.fallNet + unsubResult.fallNet;
+      const totalLoansNetSpring = subResult.springNet + unsubResult.springNet;
+
+      const totalAidAnnual = totalGrantsAnnual + totalLoansNetAnnual;
+      const totalAidFall = totalGrantsFall + totalLoansNetFall;
+      const totalAidSpring = totalGrantsSpring + totalLoansNetSpring;
+
+      const handleReset = () => {
+        setNjei("");
+        setSai("");
+        setSubLoan("");
+        setUnsubLoan("");
+      };
+
+      const handlePrint = () => {
+        window.print();
+      };
+
+      return (
+        <div className="calc-container">
+          <div className="calc-intro">
+            <h2>2026–2027 Estimated Aid Calculator</h2>
+            <p>
+              Estimate your academic year financial aid package, including State Tuition Aid Grant (TAG),
+              Federal Pell Grant, and Federal Direct Subsidized/Unsubsidized Loans with net disbursement deductions.
+            </p>
+          </div>
+
+          {/* Section A: Top Inputs Row */}
+          <div className="calc-inputs-grid">
+            {/* 1. State Aid (TAG) */}
+            <div className="calc-card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column' }}>
+              <div className="calc-card-title">
+                <span>1. State Aid (TAG)</span>
+                {tagResult && (
+                  <span className={`badge ${tagResult.annual > 0 ? 'badge-success' : 'badge-neutral'}`}>
+                    {tagResult.annual > 0 ? `Bracket: ${tagResult.label}` : 'No TAG Award'}
+                  </span>
+                )}
+              </div>
+              <div className="calc-card-subtitle">
+                State Tuition Aid Grant eligibility determined by New Jersey Eligibility Index (NJEI).
+              </div>
+
+              <div className="form-group" style={{ flexGrow: 1 }}>
+                <label htmlFor="njei-input">New Jersey Eligibility Index (NJEI)</label>
+                <input
+                  id="njei-input"
+                  type="number"
+                  value={njei}
+                  onChange={(e) => setNjei(e.target.value)}
+                  placeholder="e.g. 1200"
+                  min="0"
+                  step="1"
+                />
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.35rem', flexWrap: 'wrap', gap: '0.25rem' }}>
+                  <span className="helper-text">From NJ FAMS portal or summary.</span>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}
+                    onClick={() => setShowTagSchedule(!showTagSchedule)}
+                  >
+                    {showTagSchedule ? 'Hide TAG Table' : 'View TAG Table'}
+                  </button>
+                </div>
+              </div>
+
+              {tagResult && (
+                <div className="callout" style={{ padding: '0.75rem 1rem', marginBottom: 0, marginTop: 'auto' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600, fontSize: '0.9rem' }}>
+                    <span>Estimated TAG:</span>
+                    <span style={{ color: 'var(--stockton-blue-dark)', fontFamily: 'var(--font-mono)' }}>
+                      {fmtWhole$(tagResult.annual)}/yr ({fmtWhole$(tagResult.fall)}/sem)
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {showTagSchedule && (
+                <div style={{ marginTop: '1rem', overflowX: 'auto' }}>
+                  <table className="breakdown-table" style={{ fontSize: '0.825rem', margin: '0' }}>
+                    <thead>
+                      <tr>
+                        <th>NJEI Bracket</th>
+                        <th className="num-col">Annual</th>
+                        <th className="num-col">Fall</th>
+                        <th className="num-col">Spring</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {TAG_TABLE.map((row, idx) => (
+                        <tr
+                          key={idx}
+                          style={{
+                            backgroundColor: tagResult && tagResult.label === row.label ? 'var(--stockton-blue-light)' : 'transparent',
+                            fontWeight: tagResult && tagResult.label === row.label ? '700' : 'normal'
+                          }}
+                        >
+                          <td>{row.label}</td>
+                          <td className="num-col">{fmtWhole$(row.annual)}</td>
+                          <td className="num-col">{fmtWhole$(row.fall)}</td>
+                          <td className="num-col">{fmtWhole$(row.spring)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* 2. Federal Pell Grant */}
+            <div className="calc-card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column' }}>
+              <div className="calc-card-title">
+                <span>2. Federal Pell Grant</span>
+                {pellResult && (
+                  <span className={`badge ${pellResult.annual > 0 ? 'badge-success' : 'badge-error'}`}>
+                    {pellResult.status === 'maximum' && 'Max Pell'}
+                    {pellResult.status === 'calculated' && 'Calculated Pell'}
+                    {pellResult.status === 'ineligible' && 'Ineligible'}
+                  </span>
+                )}
+              </div>
+              <div className="calc-card-subtitle">
+                Federal Pell Grant eligibility calculated from your Student Aid Index (SAI).
+              </div>
+
+              <div className="form-group" style={{ flexGrow: 1 }}>
+                <label htmlFor="sai-input">Student Aid Index (SAI)</label>
+                <input
+                  id="sai-input"
+                  type="number"
+                  value={sai}
+                  onChange={(e) => setSai(e.target.value)}
+                  placeholder="e.g. 0 (can be -1500 to 7395)"
+                  min="-1500"
+                  step="1"
+                />
+                <span className={`helper-text ${Number(sai) > MAX_PELL ? 'error' : ''}`}>
+                  {Number(sai) > MAX_PELL
+                    ? `Note: SAI cannot exceed ${MAX_PELL} for Federal Pell Grant eligibility.`
+                    : 'From FAFSA FSS. Range: -1500 to 7395.'}
+                </span>
+              </div>
+
+              {pellResult && (
+                <div className={`callout ${pellResult.annual > 0 ? '' : 'warning'}`} style={{ padding: '0.75rem 1rem', marginBottom: 0, marginTop: 'auto' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600, fontSize: '0.9rem' }}>
+                    <span>Estimated Pell:</span>
+                    <span style={{ color: 'var(--stockton-blue-dark)', fontFamily: 'var(--font-mono)' }}>
+                      {fmtWhole$(pellResult.annual)}/yr ({fmtWhole$(pellResult.fall)}/sem)
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.8rem', marginTop: '0.35rem', color: 'var(--text-muted)' }}>
+                    {pellResult.note}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 3. Federal Direct Loans */}
+            <div className="calc-card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column' }}>
+              <div className="calc-card-title">
+                <span>3. Federal Direct Loans</span>
+                <span className="badge badge-blue">1.057% Fee</span>
+              </div>
+              <div className="calc-card-subtitle">
+                Loan acceptance is split evenly between Fall and Spring with a 1.057% origination fee deducted.
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '1rem' }}>
+                <label htmlFor="sub-loan-input">Subsidized Accepted Amount</label>
+                <div className="input-prefix-wrapper">
+                  <span className="input-prefix-symbol">$</span>
+                  <input
+                    id="sub-loan-input"
+                    className="input-with-prefix"
+                    type="number"
+                    value={subLoan}
+                    onChange={(e) => setSubLoan(e.target.value)}
+                    placeholder="0"
+                    min="0"
+                    step="100"
+                  />
+                </div>
+              </div>
+
+              <div className="form-group" style={{ flexGrow: 1, marginBottom: '1rem' }}>
+                <label htmlFor="unsub-loan-input">Unsubsidized Accepted Amount</label>
+                <div className="input-prefix-wrapper">
+                  <span className="input-prefix-symbol">$</span>
+                  <input
+                    id="unsub-loan-input"
+                    className="input-with-prefix"
+                    type="number"
+                    value={unsubLoan}
+                    onChange={(e) => setUnsubLoan(e.target.value)}
+                    placeholder="0"
+                    min="0"
+                    step="100"
+                  />
+                </div>
+              </div>
+
+              {(subResult.annualGross > 0 || unsubResult.annualGross > 0) && (
+                <div className="callout" style={{ padding: '0.75rem 1rem', marginBottom: 0, marginTop: 'auto' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.825rem', marginBottom: '0.2rem' }}>
+                    <span>Gross Accepted:</span>
+                    <span style={{ fontFamily: 'var(--font-mono)' }}>{fmt$(totalLoansGrossAnnual)}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.825rem', color: 'var(--color-error)', marginBottom: '0.2rem' }}>
+                    <span>Fee (1.057%):</span>
+                    <span style={{ fontFamily: 'var(--font-mono)' }}>−{fmt$(totalLoansFeesAnnual)}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600, fontSize: '0.875rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.25rem' }}>
+                    <span>Net Disbursed:</span>
+                    <span style={{ color: 'var(--stockton-blue-dark)', fontFamily: 'var(--font-mono)' }}>{fmt$(totalLoansNetAnnual)}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Section B: Bottom Summary & Full Breakdown */}
+          <div style={{ marginTop: '2rem' }}>
+            {/* Quick Metrics Summary */}
+            <div className="metric-grid">
+              <div className="metric-card accent-green">
+                <div className="metric-label">Total Grants</div>
+                <div className="metric-value">{fmtWhole$(totalGrantsAnnual)}</div>
+                <div className="metric-sub">{fmtWhole$(totalGrantsFall)} Fall • {fmtWhole$(totalGrantsSpring)} Spring</div>
+              </div>
+              <div className="metric-card accent-blue">
+                <div className="metric-label">Net Direct Loans Disbursed</div>
+                <div className="metric-value">{fmt$(totalLoansNetAnnual)}</div>
+                <div className="metric-sub">{fmt$(totalLoansNetFall)} Fall • {fmt$(totalLoansNetSpring)} Spring</div>
+              </div>
+              <div className="metric-card accent-gold">
+                <div className="metric-label">Total Estimated Aid Package</div>
+                <div className="metric-value">{fmt$(totalAidAnnual)}</div>
+                <div className="metric-sub">{fmt$(totalAidFall)} Fall • {fmt$(totalAidSpring)} Spring</div>
+              </div>
+            </div>
+
+            {/* Estimated Aid Package Breakdown Card */}
+            <div className="calc-card">
+              <div className="calc-card-title">
+                <span>Estimated Aid Package Breakdown</span>
+                <span className="badge badge-gold">2026–2027</span>
+              </div>
+              <div className="calc-card-subtitle">
+                Itemized schedule by semester (Fall 2026 & Spring 2027).
+              </div>
+
+              <div style={{ overflowX: 'auto' }}>
+                <table className="breakdown-table">
+                  <thead>
+                    <tr>
+                      <th>Aid Program</th>
+                      <th className="num-col">Fall 2026</th>
+                      <th className="num-col">Spring 2027</th>
+                      <th className="num-col">Total Year</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {/* GRANTS SECTION */}
+                    <tr className="category-header-row">
+                      <td colSpan="4">Grants & Scholarships</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <strong>Tuition Aid Grant (TAG)</strong>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                          {tagResult ? `NJEI: ${njei}` : 'Not calculated'}
+                        </div>
+                      </td>
+                      <td className="num-col">{fmtWhole$(tagResult ? tagResult.fall : 0)}</td>
+                      <td className="num-col">{fmtWhole$(tagResult ? tagResult.spring : 0)}</td>
+                      <td className="num-col">{fmtWhole$(tagResult ? tagResult.annual : 0)}</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <strong>Federal Pell Grant</strong>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                          {pellResult ? `SAI: ${sai}` : 'Not calculated'}
+                        </div>
+                      </td>
+                      <td className="num-col">{fmtWhole$(pellResult ? pellResult.fall : 0)}</td>
+                      <td className="num-col">{fmtWhole$(pellResult ? pellResult.spring : 0)}</td>
+                      <td className="num-col">{fmtWhole$(pellResult ? pellResult.annual : 0)}</td>
+                    </tr>
+                    <tr className="subtotal-row">
+                      <td>Total Grants</td>
+                      <td className="num-col" style={{ color: 'var(--color-success)' }}>{fmtWhole$(totalGrantsFall)}</td>
+                      <td className="num-col" style={{ color: 'var(--color-success)' }}>{fmtWhole$(totalGrantsSpring)}</td>
+                      <td className="num-col" style={{ color: 'var(--color-success)' }}>{fmtWhole$(totalGrantsAnnual)}</td>
+                    </tr>
+
+                    {/* LOANS SECTION */}
+                    <tr className="category-header-row">
+                      <td colSpan="4">Federal Direct Loans (Net Disbursed)</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <strong>Direct Subsidized Loan</strong>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                          Gross: {fmt$(subResult.annualGross)} | Fee: −{fmt$(subResult.annualFee)}
+                        </div>
+                      </td>
+                      <td className="num-col">{fmt$(subResult.fallNet)}</td>
+                      <td className="num-col">{fmt$(subResult.springNet)}</td>
+                      <td className="num-col">{fmt$(subResult.annualNet)}</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <strong>Direct Unsubsidized Loan</strong>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                          Gross: {fmt$(unsubResult.annualGross)} | Fee: −{fmt$(unsubResult.annualFee)}
+                        </div>
+                      </td>
+                      <td className="num-col">{fmt$(unsubResult.fallNet)}</td>
+                      <td className="num-col">{fmt$(unsubResult.springNet)}</td>
+                      <td className="num-col">{fmt$(unsubResult.annualNet)}</td>
+                    </tr>
+                    <tr className="subtotal-row">
+                      <td>Total Net Direct Loans</td>
+                      <td className="num-col" style={{ color: 'var(--stockton-blue)' }}>{fmt$(totalLoansNetFall)}</td>
+                      <td className="num-col" style={{ color: 'var(--stockton-blue)' }}>{fmt$(totalLoansNetSpring)}</td>
+                      <td className="num-col" style={{ color: 'var(--stockton-blue)' }}>{fmt$(totalLoansNetAnnual)}</td>
+                    </tr>
+
+                    {/* TOTAL AID */}
+                    <tr className="total-row">
+                      <td>TOTAL ESTIMATED AID</td>
+                      <td className="num-col">{fmt$(totalAidFall)}</td>
+                      <td className="num-col">{fmt$(totalAidSpring)}</td>
+                      <td className="num-col">{fmt$(totalAidAnnual)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="callout warning" style={{ marginTop: '1.25rem', fontSize: '0.85rem' }}>
+                <h4 style={{ fontSize: '0.95rem' }}>Important Aid Packaging Notes</h4>
+                <ul style={{ paddingLeft: '1.25rem', margin: '0.35rem 0 0' }}>
+                  <li>Tuition Aid Grant (TAG) awards are contingent upon NJ state legislative funding and full-time enrollment (12+ credits).</li>
+                  <li>Federal Direct Loan origination fees (1.057%) are deducted automatically by the US Department of Education prior to semester disbursement.</li>
+                  <li>Official financial aid offers will be posted in your Stockton portal.</li>
+                </ul>
+              </div>
+
+              <div className="actions-bar">
+                <button type="button" className="btn btn-secondary" onClick={handleReset}>
+                  Reset Form
+                </button>
+                <button type="button" className="btn btn-primary" onClick={handlePrint}>
+                  Print Estimate Report
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
