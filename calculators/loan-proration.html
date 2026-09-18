@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Federal Direct Loan Proration Calculator — Stockton University</title>
   <link rel="stylesheet" href="../css/stockton-theme.css" />
-  <style>
-    input[type="range"] { accent-color: var(--stockton-blue); }
-  </style>
 </head>
 <body>
   <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -45,6 +42,8 @@
     const { useState } = React;
 
     const ANNUAL_CREDITS = 24;
+    const MIN_HALF_TIME_CREDITS = 6;
+    const ORIGINATION_FEE_RATE = 0.01057; // 1.057% statutory federal origination fee
 
     const LOAN_LIMITS = {
       dependent:   { subsidized: 5500, unsubsidized: 2000,  total: 7500  },
@@ -61,23 +60,11 @@
     const S = {
       root: {
         fontFamily: "var(--font-sans)",
-        maxWidth: 680,
+        maxWidth: 720,
         margin: "2rem auto 4rem",
         padding: 0,
         background: "transparent",
         color: "var(--text-primary)",
-      },
-      header: {
-        display: "none"
-      },
-      wordmark: {
-        display: "none"
-      },
-      title: {
-        display: "none"
-      },
-      subtitle: {
-        display: "none"
       },
       progress: {
         display: "flex",
@@ -145,12 +132,12 @@
       },
       warningBox: {
         background: "var(--color-warning-bg)",
-        border: "1px solid var(--border-color)",
+        border: "1px solid rgba(138, 90, 0, 0.2)",
         borderLeft: "4px solid var(--color-warning)",
         borderRadius: "var(--radius-card)",
         padding: "1rem 1.25rem",
         fontSize: 14,
-        color: "var(--color-warning)",
+        color: "var(--text-primary)",
         marginBottom: "1.25rem",
         fontFamily: "var(--font-sans)",
         lineHeight: 1.65,
@@ -242,22 +229,53 @@
       resultHeader: {
         background: "var(--stockton-blue)",
         color: "#fff",
-        padding: "1.25rem 1.5rem",
+        padding: "1.5rem",
         fontFamily: "var(--font-sans)",
       },
       resultHeaderTitle: {
         fontSize: 11,
         letterSpacing: "0.1em",
         textTransform: "uppercase",
-        opacity: 0.85,
+        opacity: 0.9,
         margin: 0,
         fontWeight: 600,
       },
-      resultHeaderAmt: {
-        fontSize: 32,
+      resultStatsRow: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        flexWrap: "wrap",
+        gap: "1.5rem",
+        marginTop: "0.75rem",
+        paddingTop: "0.5rem",
+      },
+      resultStatBlock: {
+        flex: "1 1 200px",
+      },
+      resultStatLabel: {
+        fontSize: 12,
+        letterSpacing: "0.05em",
+        textTransform: "uppercase",
+        opacity: 0.85,
+        marginBottom: 2,
+      },
+      resultStatPrimary: {
+        fontSize: 34,
         fontWeight: 700,
-        margin: "4px 0 0",
+        lineHeight: 1.1,
         fontFamily: "var(--font-sans)",
+      },
+      resultStatSecondary: {
+        fontSize: 22,
+        fontWeight: 600,
+        lineHeight: 1.2,
+        opacity: 0.95,
+        fontFamily: "var(--font-sans)",
+      },
+      resultStatNote: {
+        fontSize: 12,
+        opacity: 0.85,
+        marginTop: 4,
       },
       resultBody: { padding: "1.5rem" },
       formulaWrap: {
@@ -280,7 +298,7 @@
         display: "flex",
         alignItems: "center",
         gap: 10,
-        fontSize: 16,
+        fontSize: 15,
         flexWrap: "wrap",
       },
       formulaFraction: {
@@ -290,54 +308,69 @@
         gap: 2,
       },
       formulaNum: {
-        fontSize: 16,
+        fontSize: 15,
         fontWeight: 700,
         color: "var(--stockton-blue)",
         borderBottom: "2px solid var(--stockton-blue)",
         paddingBottom: 2,
         lineHeight: 1,
       },
-      formulaDen: { fontSize: 13, color: "var(--text-primary)", lineHeight: 1, paddingTop: 2 },
+      formulaDen: { fontSize: 12, color: "var(--text-primary)", lineHeight: 1, paddingTop: 2 },
       formulaOp:  { color: "var(--text-muted)", fontSize: 18 },
       formulaAnnual: { fontSize: 15, fontWeight: 600, color: "var(--stockton-blue)" },
       loanBreakdown: {
         display: "grid",
-        gridTemplateColumns: "1fr 1fr 1fr",
-        gap: 12,
-        marginBottom: "1.25rem",
+        gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+        gap: 14,
+        marginBottom: "1.5rem",
       },
-      loanType: (c) => ({
-        background: c === "sub" ? "var(--color-success-bg)" : c === "unsub" ? "var(--color-warning-bg)" : "var(--stockton-blue-light)",
+      loanCard: (type) => ({
+        background: type === "sub" ? "var(--color-success-bg)" : type === "unsub" ? "var(--color-warning-bg)" : "var(--stockton-blue-light)",
         borderRadius: "var(--radius-btn)",
-        padding: "0.85rem",
+        padding: "1.25rem 1rem",
         fontFamily: "var(--font-sans)",
-        textAlign: "center",
-        border: `1px solid ${c === 'sub' ? 'rgba(18,122,58,0.15)' : c === 'unsub' ? 'rgba(138,90,0,0.15)' : 'var(--border-color)'}`,
+        border: `1px solid ${type === "sub" ? "rgba(18,122,58,0.2)" : type === "unsub" ? "rgba(138,90,0,0.2)" : "var(--border-color)"}`,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
       }),
-      loanTypeLabel: {
-        fontSize: 10,
+      loanCardHeader: {
+        fontSize: 11,
         letterSpacing: "0.08em",
         textTransform: "uppercase",
         color: "var(--text-muted)",
-        display: "block",
-        marginBottom: 4,
-        fontWeight: 600,
-      },
-      loanTypeAmt: (c) => ({
-        fontSize: 18,
         fontWeight: 700,
-        color: c === "sub" ? "var(--color-success)" : c === "unsub" ? "var(--color-warning)" : "var(--stockton-blue-dark)",
+        marginBottom: 8,
         display: "block",
-      }),
+      },
+      loanLineItem: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        fontSize: 13,
+        marginBottom: 6,
+      },
+      loanTotalLine: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        fontWeight: 700,
+        fontSize: 15,
+        borderTop: "1px solid rgba(0,0,0,0.12)",
+        paddingTop: 8,
+        marginTop: 6,
+      },
       callout: {
-        background: "var(--bg-color)",
-        borderRadius: "var(--radius-btn)",
-        padding: "1rem 1.25rem",
+        background: "var(--card-bg)",
+        border: "1px solid var(--border-color)",
+        borderLeft: "4px solid var(--stockton-blue)",
+        borderRadius: "var(--radius-card)",
+        padding: "1.15rem 1.25rem",
         fontSize: 13,
         color: "var(--text-primary)",
         fontFamily: "var(--font-sans)",
         lineHeight: 1.65,
-        borderLeft: "4px solid var(--stockton-blue)",
+        marginBottom: "1rem",
       },
       resetBtn: {
         background: "transparent",
@@ -349,8 +382,8 @@
         cursor: "pointer",
         textDecoration: "underline",
         padding: 0,
-        marginTop: "0.75rem",
-        display: "block",
+        marginTop: "1rem",
+        display: "inline-block",
       },
       notEligibleCard: {
         background: "var(--card-bg)",
@@ -372,7 +405,7 @@
         borderRadius: 20,
         marginBottom: 12,
         fontFamily: "var(--font-sans)",
-        border: "1px solid rgba(138,90,0,0.15)",
+        border: "1px solid rgba(138,90,0,0.2)",
       },
     };
 
@@ -382,13 +415,33 @@
       const [dependency, setDependency] = useState(null);
       const [credits,    setCredits]    = useState(12);
 
-      const limits        = dependency ? LOAN_LIMITS[dependency] : null;
-      const prorationFactor = Math.min(credits / ANNUAL_CREDITS, 0.5);
-      const proratedTotal = limits ? Math.round(prorationFactor * limits.total) : 0;
-      const proratedSub   = limits ? Math.round(prorationFactor * limits.subsidized) : 0;
-      const proratedUnsub = limits ? Math.round(prorationFactor * limits.unsubsidized) : 0;
+      const limits = dependency ? LOAN_LIMITS[dependency] : null;
+      const isBelowHalfTime = credits < MIN_HALF_TIME_CREDITS;
 
-      const reset = () => { setStep(0); setIsEligible(null); setDependency(null); setCredits(12); };
+      // Title IV rule: Under 6 credits results in $0 loan eligibility
+      const prorationFactor = isBelowHalfTime ? 0 : Math.min(credits, 12) / ANNUAL_CREDITS;
+
+      // Gross loan amounts (added to principal debt)
+      const proratedTotalGross = limits && !isBelowHalfTime ? Math.round(prorationFactor * limits.total) : 0;
+      const proratedSubGross   = limits && !isBelowHalfTime ? Math.round(prorationFactor * limits.subsidized) : 0;
+      const proratedUnsubGross = limits && !isBelowHalfTime ? Math.round(prorationFactor * limits.unsubsidized) : 0;
+
+      // Statutory federal origination fee deduction (1.057%)
+      const subFee = Math.round(proratedSubGross * ORIGINATION_FEE_RATE);
+      const subNet = proratedSubGross - subFee;
+
+      const unsubFee = Math.round(proratedUnsubGross * ORIGINATION_FEE_RATE);
+      const unsubNet = proratedUnsubGross - unsubFee;
+
+      const totalFee = subFee + unsubFee;
+      const totalNet = proratedTotalGross - totalFee;
+
+      const reset = () => {
+        setStep(0);
+        setIsEligible(null);
+        setDependency(null);
+        setCredits(12);
+      };
 
       const currentStepIndex = step === 0.5 ? 0 : Math.floor(step);
 
@@ -412,36 +465,39 @@
 
       return (
         <div style={S.root}>
-
-
-
           <ProgressBar />
 
           {/* ── Step 0: Eligibility ── */}
           {step === 0 && (
             <div>
               <div style={S.educationBox}>
-                <strong>What is loan proration?</strong> Federal Direct Loans are calculated assuming
-                a full academic year (24 credits). When a graduating undergraduate student completes
-                their degree in a single semester, federal regulations require the institution to{" "}
-                <em>prorate</em> — proportionally adjust — the loan amount based on actual credits enrolled.
+                <p style={{ margin: "0 0 0.5rem" }}>
+                  <strong>What is loan proration?</strong> Federal Direct Loans are calculated assuming
+                  a full academic year (24 undergraduate credits). When a graduating undergraduate student completes
+                  their degree requirements in a single semester, Title IV federal regulations require the institution to{" "}
+                  <em>prorate</em> — proportionally adjust — the loan amount based on actual credits enrolled.
+                </p>
+                <p style={{ margin: 0 }}>
+                  <strong>Graduation Scenarios:</strong> While proration most commonly affects <strong>December (Fall) graduates</strong>,
+                  it also applies to undergraduate students completing their degree requirements in a <strong>single final Spring or Summer term</strong> with no preceding enrollment in the aid year.
+                </p>
               </div>
               <div style={S.card}>
                 <p style={S.questionText}>
-                  Are you a graduating undergraduate student completing your degree this semester?
+                  Are you an undergraduate student completing your degree in a single final semester?
                 </p>
-                <p style={{ fontSize: 13, color: "#666", fontFamily: "sans-serif", marginBottom: "1rem", marginTop: 4 }}>
-                  Proration only applies to undergraduates in their final semester.
-                  Graduate and professional students are not affected.
+                <p style={{ fontSize: 13, color: "var(--text-muted)", fontFamily: "var(--font-sans)", marginBottom: "1rem", marginTop: 4 }}>
+                  Proration only applies to undergraduates in their final semester of study.
+                  Graduate and continuing students enrolled for both terms are not affected.
                 </p>
                 <div style={S.optionGrid}>
                   <button style={S.optionBtn(isEligible === true)} onClick={() => setIsEligible(true)}>
-                    <span style={S.optionTitle(isEligible === true)}>Yes</span>
-                    <span style={S.optionDesc}>I'm an undergrad completing my degree this semester (typically December graduates).</span>
+                    <span style={S.optionTitle(isEligible === true)}>Yes, graduating this term</span>
+                    <span style={S.optionDesc}>I'm an undergraduate completing all remaining degree requirements in one semester (Fall/December, single-term Spring, or Summer).</span>
                   </button>
                   <button style={S.optionBtn(isEligible === false)} onClick={() => setIsEligible(false)}>
                     <span style={S.optionTitle(isEligible === false)}>No</span>
-                    <span style={S.optionDesc}>I'm not graduating this semester, or I'm a graduate / professional student.</span>
+                    <span style={S.optionDesc}>I will be enrolled for both fall and spring, have future semesters remaining, or I am a graduate student.</span>
                   </button>
                 </div>
                 <div style={S.btnRow}>
@@ -461,18 +517,18 @@
           {step === 0.5 && (
             <div style={S.notEligibleCard}>
               <div style={S.badge}>Not Subject to Proration</div>
-              <p style={{ fontSize: 16, color: "#333", marginBottom: 8 }}>
+              <p style={{ fontSize: 17, fontWeight: 600, color: "var(--stockton-blue-dark)", marginBottom: 8 }}>
                 Loan proration does not apply to you.
               </p>
-              <p style={{ fontSize: 13, color: "#666", maxWidth: 440, margin: "0 auto 1.25rem", lineHeight: 1.65 }}>
-                Only undergraduate students completing their final semester of enrollment have their
-                loans prorated. Graduate students and students continuing beyond this semester receive
-                their full annual loan amounts.
+              <p style={{ fontSize: 13, color: "var(--text-muted)", maxWidth: 500, margin: "0 auto 1.25rem", lineHeight: 1.65 }}>
+                Under federal regulations, loan proration applies solely to undergraduate students completing their degree requirements in a single final term of enrollment within the academic year. Continuing undergraduates enrolled for both fall and spring semesters, as well as graduate students, receive their full standard annual loan eligibility.
               </p>
-              <p style={{ fontSize: 13, color: "#444", lineHeight: 1.65 }}>
-                Questions? Contact the Stockton Financial Aid Office at{" "}
-                <strong>(609) 652-4203</strong> or email <strong>finaid@stockton.edu</strong>.
-              </p>
+              <div style={{ ...S.callout, textAlign: "left", maxWidth: 500, margin: "0 auto 1.25rem" }}>
+                <strong>Have questions about your financial aid package?</strong>
+                <p style={{ margin: "0.35rem 0 0" }}>
+                  Contact the Stockton Financial Aid Office at <strong>(609) 652-4203</strong>, email <strong>finaid@stockton.edu</strong>, or book an appointment at <a href="https://stockton.edu/contactfinaid" target="_blank" rel="noopener noreferrer">stockton.edu/contactfinaid</a>.
+                </p>
+              </div>
               <button style={S.resetBtn} onClick={reset}>← Start over</button>
             </div>
           )}
@@ -483,25 +539,25 @@
               <div style={S.educationBox}>
                 <strong>Why does dependency status matter?</strong> The federal government sets
                 different annual loan limits depending on whether you are classified as a{" "}
-                <em>dependent</em> or <em>independent</em> student. Independent students (and
-                dependents with a Parent PLUS Loan denial) have access to higher unsubsidized
+                <em>dependent</em> or <em>independent</em> student on your FAFSA. Independent students (and
+                dependent students whose parents received an official Parent PLUS Loan denial) have access to higher unsubsidized
                 loan amounts.
               </div>
               <div style={S.card}>
                 <p style={S.questionText}>
                   What is your dependency status for federal financial aid purposes?
                 </p>
-                <p style={{ fontSize: 13, color: "#666", fontFamily: "sans-serif", marginBottom: "1rem", marginTop: 4 }}>
-                  This is determined by your FAFSA. It is not simply whether you live with your parents.
+                <p style={{ fontSize: 13, color: "var(--text-muted)", fontFamily: "var(--font-sans)", marginBottom: "1rem", marginTop: 4 }}>
+                  This status is determined by federal criteria on your FAFSA, not simply whether you live with your family.
                 </p>
                 <div style={S.optionGrid}>
                   <button style={S.optionBtn(dependency === "dependent")} onClick={() => setDependency("dependent")}>
-                    <span style={S.optionTitle(dependency === "dependent")}>Dependent</span>
-                    <span style={S.optionDesc}>FAFSA includes parent information. Annual limit: $7,500 (Sub $5,500 + Unsub $2,000).</span>
+                    <span style={S.optionTitle(dependency === "dependent")}>Dependent Student</span>
+                    <span style={S.optionDesc}>FAFSA includes parental data. Senior base limit: $7,500 ($5,500 Sub + $2,000 Unsub).</span>
                   </button>
                   <button style={S.optionBtn(dependency === "independent")} onClick={() => setDependency("independent")}>
-                    <span style={S.optionTitle(dependency === "independent")}>Independent</span>
-                    <span style={S.optionDesc}>Or dependent with a Parent PLUS denial. Annual limit: $12,500 (Sub $5,500 + Unsub $7,000).</span>
+                    <span style={S.optionTitle(dependency === "independent")}>Independent Student</span>
+                    <span style={S.optionDesc}>FAFSA does not require parent info, or student has Parent PLUS denial. Senior limit: $12,500 ($5,500 Sub + $7,000 Unsub).</span>
                   </button>
                 </div>
                 <div style={S.btnRow}>
@@ -522,48 +578,88 @@
           {step === 2 && (
             <div>
               <div style={S.educationBox}>
-                <strong>How credits affect your loan.</strong> The proration formula divides your
-                enrolled credits by <strong>24</strong> (the standard full academic year credit load)
-                and multiplies by your annual loan limit. More credits = a proportionally higher
-                prorated amount.
+                <strong>How credits affect your prorated loan.</strong> The proration formula divides your
+                enrolled credits by <strong>24</strong> (the standard full academic year base load)
+                and multiplies by your annual loan limit. In a single graduating semester, eligibility
+                is prorated up to <strong>12 credits</strong> (50% of the annual maximum).
               </div>
               <div style={S.card}>
-                <p style={S.questionText}>How many credits are you enrolled in this semester?</p>
+                <label htmlFor="credit-slider" style={S.questionText}>
+                  How many credits are you enrolled in this semester?
+                </label>
+                
                 <div style={S.sliderWrap}>
                   <div style={S.sliderLabel}>
-                    <span style={S.sliderLabelText}>Credits enrolled</span>
+                    <span style={S.sliderLabelText}>Enrolled credits (1–12)</span>
                     <span style={S.sliderValue}>{credits} credits</span>
                   </div>
                   <input
-                    type="range" min={1} max={24} step={1} value={credits}
+                    id="credit-slider"
+                    type="range"
+                    min={1}
+                    max={12}
+                    step={1}
+                    value={credits}
                     onChange={(e) => setCredits(Number(e.target.value))}
                     style={S.slider}
                   />
                   <div style={S.sliderTicks}>
-                    <span>1</span><span>6</span><span>12</span><span>18</span><span>24</span>
+                    <span>1</span><span>3</span><span style={{ fontWeight: 700, color: "var(--stockton-blue)" }}>6 (Half-Time Min)</span><span>9</span><span>12 (Full Term Cap)</span>
                   </div>
                 </div>
 
+                {/* Half-Time Warning Callout */}
+                {isBelowHalfTime ? (
+                  <div style={{ ...S.warningBox, marginTop: "1.25rem", marginBottom: "0.5rem" }}>
+                    <strong>⚠️ Direct Loans require at least half-time enrollment (minimum 6 credits).</strong><br />
+                    Under Title IV federal regulations, students enrolled in 1 to 5 undergraduate credits are ineligible for Federal Direct Loan disbursements. Enrollment below 6 credits results in <strong>$0 loan eligibility</strong>.
+                  </div>
+                ) : (
+                  <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: "0.75rem", marginBottom: 0 }}>
+                    Federal Title IV regulations require undergraduate students to be enrolled in at least <strong>6 credits</strong> (half-time) to receive Federal Direct Loan disbursements.
+                  </p>
+                )}
+
+                {/* Live Estimate Card */}
                 {dependency && (
-                  <div style={{ marginTop: "1.5rem", padding: "1rem", background: "#f7f5f0", borderRadius: 6 }}>
-                    <div style={{ fontFamily: "sans-serif", fontSize: 12, color: "#888", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 6 }}>
-                      Live estimate
+                  <div style={{ marginTop: "1.25rem", padding: "1.25rem", background: "var(--bg-color)", borderRadius: "var(--radius-btn)", border: "1px solid var(--border-color)" }}>
+                    <div style={{ fontFamily: "var(--font-sans)", fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 6, fontWeight: 600 }}>
+                      Live Estimate
                     </div>
-                    <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                      <span style={{ fontFamily: "Georgia, serif", fontSize: 32, color: "#1b4332", fontWeight: "normal" }}>
-                        {fmt(Math.round(Math.min(credits / ANNUAL_CREDITS,0.5) * LOAN_LIMITS[dependency].total))}
-                      </span>
-                      <span style={{ fontFamily: "sans-serif", fontSize: 13, color: "#888" }}>prorated total</span>
-                    </div>
-                    <div style={{ fontFamily: "sans-serif", fontSize: 13, color: "#555", marginTop: 4 }}>
-                      {credits} ÷ 24 = {Math.min(credits / ANNUAL_CREDITS,0.5).toFixed(3)}{credits / ANNUAL_CREDITS > 0.5 && " (capped at 50%)"} × {fmt(LOAN_LIMITS[dependency].total)} annual limit
-                    </div>
+                    {isBelowHalfTime ? (
+                      <div>
+                        <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                          <span style={{ fontSize: 30, color: "var(--color-error)", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
+                            $0
+                          </span>
+                          <span style={{ fontSize: 13, color: "var(--text-muted)" }}>prorated eligibility</span>
+                        </div>
+                        <p style={{ fontSize: 12, color: "var(--color-error)", marginTop: 4, marginBottom: 0 }}>
+                          Enrolled in {credits} credit{credits === 1 ? "" : "s"} (below 6-credit half-time minimum threshold).
+                        </p>
+                      </div>
+                    ) : (
+                      <div>
+                        <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                          <span style={{ fontSize: 32, color: "var(--stockton-blue-dark)", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
+                            {fmt(totalNet)}
+                          </span>
+                          <span style={{ fontSize: 13, color: "var(--text-muted)" }}>net disbursement to Bursar</span>
+                        </div>
+                        <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>
+                          Gross Loan Added to Debt: <strong>{fmt(proratedTotalGross)}</strong> · Federal Origination Fee (1.057%): <strong>−{fmt(totalFee)}</strong>
+                        </div>
+                        <div style={{ fontSize: 12, color: "var(--stockton-blue-dark)", marginTop: 6, fontFamily: "var(--font-mono)" }}>
+                          Formula: {credits} ÷ 24 = {(credits / ANNUAL_CREDITS).toFixed(3)} × {fmt(LOAN_LIMITS[dependency].total)} = {fmt(proratedTotalGross)} gross
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
                 <div style={S.btnRow}>
                   <button style={S.btnSecondary} onClick={() => setStep(1)}>← Back</button>
-                  <button style={S.btnPrimary} onClick={() => setStep(3)}>Calculate →</button>
+                  <button style={S.btnPrimary} onClick={() => setStep(3)}>Calculate Eligibility →</button>
                 </div>
               </div>
             </div>
@@ -574,78 +670,211 @@
             <div>
               <div style={S.resultCard}>
                 <div style={S.resultHeader}>
-                  <p style={S.resultHeaderTitle}>Estimated prorated loan eligibility</p>
-                  <p style={S.resultHeaderAmt}>{fmt(proratedTotal)}</p>
-                  <p style={{ fontFamily: "sans-serif", fontSize: 13, opacity: 0.75, margin: "4px 0 0" }}>
-                    {credits} credits enrolled · {dependency === "dependent" ? "Dependent" : "Independent"} student
-                  </p>
+                  <p style={S.resultHeaderTitle}>Estimated Prorated Loan Eligibility</p>
+
+                  {isBelowHalfTime ? (
+                    <div style={{ marginTop: "0.75rem" }}>
+                      <div style={{ fontSize: 38, fontWeight: 700, fontFamily: "var(--font-mono)", color: "#fff" }}>
+                        $0
+                      </div>
+                      <p style={{ fontSize: 13, opacity: 0.9, margin: "6px 0 0" }}>
+                        {credits} credits enrolled · Below 6-credit half-time minimum threshold
+                      </p>
+                    </div>
+                  ) : (
+                    <div>
+                      <div style={S.resultStatsRow}>
+                        <div style={S.resultStatBlock}>
+                          <div style={S.resultStatLabel}>Net Disbursement (Bursar Credit)</div>
+                          <div style={{ ...S.resultStatPrimary, fontFamily: "var(--font-mono)" }}>{fmt(totalNet)}</div>
+                          <div style={S.resultStatNote}>Actual funds applied toward your Stockton bill</div>
+                        </div>
+                        <div style={S.resultStatBlock}>
+                          <div style={S.resultStatLabel}>Gross Prorated Loan (Debt)</div>
+                          <div style={{ ...S.resultStatSecondary, fontFamily: "var(--font-mono)" }}>{fmt(proratedTotalGross)}</div>
+                          <div style={S.resultStatNote}>Less {fmt(totalFee)} statutory federal fee (1.057%)</div>
+                        </div>
+                      </div>
+                      <p style={{ fontSize: 12, opacity: 0.85, margin: "1rem 0 0", borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: "0.5rem" }}>
+                        {credits} credits enrolled · {dependency === "dependent" ? "Dependent" : "Independent"} Senior
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <div style={S.resultBody}>
-                  {/* Formula */}
+                  {/* Half-Time Rule Warning for < 6 credits */}
+                  {isBelowHalfTime ? (
+                    <div style={S.warningBox}>
+                      <strong style={{ color: "var(--color-warning)", display: "block", marginBottom: 4, fontSize: 15 }}>
+                        ⚠️ Half-Time Enrollment Requirement Not Met
+                      </strong>
+                      Under Title IV federal regulations, undergraduate students <strong>must be enrolled in at least half-time study (at least 6 degree-applicable credits)</strong> to receive any Federal Direct Loan disbursement. Because your enrollment of <strong>{credits} credit{credits === 1 ? "" : "s"}</strong> is below this threshold, your Federal Direct Loan eligibility for this term is <strong>$0</strong>.
+                    </div>
+                  ) : null}
+
+                  {/* Formula Box */}
                   <div style={S.formulaWrap}>
-                    <div style={S.formulaTitle}>How this was calculated</div>
-                    <div style={S.formulaRow}>
-                      <div style={S.formulaFraction}>
-                        <span style={S.formulaNum}>{credits} credits enrolled</span>
-                        <span style={S.formulaDen}>24 credits (full academic year)</span>
-                      </div>
-                      <span style={S.formulaOp}>×</span>
-                      <span style={S.formulaAnnual}>{fmt(limits.total)} annual limit</span>
-                      <span style={S.formulaOp}>=</span>
-                      <span style={{ ...S.formulaAnnual, fontSize: 18 }}>{fmt(proratedTotal)}</span>
-                    </div>
-                  </div>
-
-                  {/* Breakdown */}
-                  <div style={{ fontFamily: "sans-serif", fontSize: 12, color: "#888", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8 }}>
-                    Loan breakdown
-                  </div>
-                  <div style={S.loanBreakdown}>
-                    <div style={S.loanType("sub")}>
-                      <span style={S.loanTypeLabel}>Subsidized</span>
-                      <span style={S.loanTypeAmt("sub")}>{fmt(proratedSub)}</span>
-                    </div>
-                    <div style={S.loanType("unsub")}>
-                      <span style={S.loanTypeLabel}>Unsubsidized</span>
-                      <span style={S.loanTypeAmt("unsub")}>{fmt(proratedUnsub)}</span>
-                    </div>
-                    <div style={S.loanType("tot")}>
-                      <span style={S.loanTypeLabel}>Total</span>
-                      <span style={S.loanTypeAmt("tot")}>{fmt(proratedTotal)}</span>
-                    </div>
-                  </div>
-
-                  {/* Callouts */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                    <div style={S.educationBox}>
-                      <strong>What happens next?</strong> If the prorated amount is <em>less</em> than
-                      what has already disbursed, a downward adjustment will be made automatically —
-                      which may result in a bill from the Bursar's Office. Check your account on the{" "}
-                      <strong>goStockton portal</strong> regularly.
-                    </div>
-                    {proratedTotal > limits.total * 0.5 && (
-                      <div style={S.educationBox}>
-                        <strong>You may be eligible for more.</strong> If proration results in an{" "}
-                        <em>increase</em> in your loan eligibility, Stockton's Financial Aid office
-                        will email you. You can also proactively reach out at{" "}
-                        <strong>finaid@stockton.edu</strong>.
+                    <div style={S.formulaTitle}>Calculation Breakdown</div>
+                    {isBelowHalfTime ? (
+                      <p style={{ fontSize: 14, color: "var(--text-primary)", margin: 0 }}>
+                        <strong>Enrolled:</strong> {credits} credit{credits === 1 ? "" : "s"} &lt; 6 credits (minimum half-time requirement) → <strong>Eligibility: $0</strong>
+                      </p>
+                    ) : (
+                      <div>
+                        <div style={S.formulaRow}>
+                          <div style={S.formulaFraction}>
+                            <span style={S.formulaNum}>{credits} credits enrolled</span>
+                            <span style={S.formulaDen}>24 credits (annual base)</span>
+                          </div>
+                          <span style={S.formulaOp}>×</span>
+                          <span style={S.formulaAnnual}>{fmt(limits.total)} annual limit</span>
+                          <span style={S.formulaOp}>=</span>
+                          <span style={{ ...S.formulaAnnual, fontSize: 18, color: "var(--stockton-blue-dark)" }}>{fmt(proratedTotalGross)} gross loan</span>
+                        </div>
+                        <div style={{ marginTop: 10, fontSize: 13, color: "var(--text-muted)", borderTop: "1px solid var(--border-color)", paddingTop: 8 }}>
+                          Gross Loan <strong>{fmt(proratedTotalGross)}</strong> − Mandatory 1.057% Federal Origination Fee (<strong>−{fmt(totalFee)}</strong>) = <strong>{fmt(totalNet)} Net Disbursement</strong>
+                        </div>
                       </div>
                     )}
-                    <div style={S.warningBox}>
-                      <strong>Important:</strong> This estimate doesn't account for your cumulative
-                      borrowing history or federal aggregate loan limits. Your actual award may differ.
-                      Visit <strong>studentaid.gov</strong> to review your lifetime borrowing history.
+                  </div>
+
+                  {/* Detailed Loan Breakdown Grid */}
+                  <div style={{ fontFamily: "var(--font-sans)", fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8, fontWeight: 700 }}>
+                    Direct Loan Breakdown (Gross vs. Net Disbursement)
+                  </div>
+
+                  <div style={S.loanBreakdown}>
+                    {/* Subsidized */}
+                    <div style={S.loanCard("sub")}>
+                      <div>
+                        <span style={S.loanCardHeader}>Direct Subsidized Loan</span>
+                        <div style={S.loanLineItem}>
+                          <span style={{ color: "var(--text-muted)" }}>Gross Prorated:</span>
+                          <span style={{ fontWeight: 600, fontFamily: "var(--font-mono)" }}>{fmt(proratedSubGross)}</span>
+                        </div>
+                        <div style={{ ...S.loanLineItem, color: "var(--color-error)" }}>
+                          <span>Fee (1.057%):</span>
+                          <span style={{ fontFamily: "var(--font-mono)" }}>−{fmt(subFee)}</span>
+                        </div>
+                      </div>
+                      <div>
+                        <div style={S.loanTotalLine}>
+                          <span>Net Disbursed:</span>
+                          <span style={{ color: "var(--color-success)", fontFamily: "var(--font-mono)", fontSize: 16 }}>{fmt(subNet)}</span>
+                        </div>
+                        <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "6px 0 0", lineHeight: 1.4 }}>
+                          Need-based. Government pays interest while enrolled at least half-time.
+                        </p>
+                      </div>
                     </div>
+
+                    {/* Unsubsidized */}
+                    <div style={S.loanCard("unsub")}>
+                      <div>
+                        <span style={S.loanCardHeader}>Direct Unsubsidized Loan</span>
+                        <div style={S.loanLineItem}>
+                          <span style={{ color: "var(--text-muted)" }}>Gross Prorated:</span>
+                          <span style={{ fontWeight: 600, fontFamily: "var(--font-mono)" }}>{fmt(proratedUnsubGross)}</span>
+                        </div>
+                        <div style={{ ...S.loanLineItem, color: "var(--color-error)" }}>
+                          <span>Fee (1.057%):</span>
+                          <span style={{ fontFamily: "var(--font-mono)" }}>−{fmt(unsubFee)}</span>
+                        </div>
+                      </div>
+                      <div>
+                        <div style={S.loanTotalLine}>
+                          <span>Net Disbursed:</span>
+                          <span style={{ color: "var(--color-warning)", fontFamily: "var(--font-mono)", fontSize: 16 }}>{fmt(unsubNet)}</span>
+                        </div>
+                        <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "6px 0 0", lineHeight: 1.4 }}>
+                          Non-need-based. Interest accrues during all enrollment periods.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Total */}
+                    <div style={S.loanCard("tot")}>
+                      <div>
+                        <span style={S.loanCardHeader}>Total Federal Direct Loans</span>
+                        <div style={S.loanLineItem}>
+                          <span style={{ color: "var(--text-muted)" }}>Total Gross Debt:</span>
+                          <span style={{ fontWeight: 600, fontFamily: "var(--font-mono)" }}>{fmt(proratedTotalGross)}</span>
+                        </div>
+                        <div style={{ ...S.loanLineItem, color: "var(--color-error)" }}>
+                          <span>Total Fees:</span>
+                          <span style={{ fontFamily: "var(--font-mono)" }}>−{fmt(totalFee)}</span>
+                        </div>
+                      </div>
+                      <div>
+                        <div style={S.loanTotalLine}>
+                          <span>Total Net Disbursed:</span>
+                          <span style={{ color: "var(--stockton-blue-dark)", fontFamily: "var(--font-mono)", fontSize: 17 }}>{fmt(totalNet)}</span>
+                        </div>
+                        <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "6px 0 0", lineHeight: 1.4 }}>
+                          Total credit applied to your Stockton University Bursar bill.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Informational Callouts & Policy Disclosures */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                    
+                    {/* Subsidized vs Unsubsidized Need Split */}
                     <div style={S.callout}>
-                      <strong>Annual loan limits used for this calculation:</strong><br />
-                      {dependency === "dependent"
-                        ? "Dependent senior: Subsidized $5,500 + Unsubsidized $2,000 = $7,500 total annual limit."
-                        : "Independent senior: Subsidized $5,500 + Unsubsidized $7,000 = $12,500 total annual limit."}
-                      <br /><br />
-                      Questions? Contact Stockton Financial Aid at <strong>(609) 652-4203</strong> or
-                      email <strong>finaid@stockton.edu</strong>.
+                      <strong style={{ color: "var(--stockton-blue-dark)", display: "block", marginBottom: 4 }}>
+                        Direct Subsidized vs. Unsubsidized Split Clarification
+                      </strong>
+                      Federal Direct Subsidized loan eligibility is strictly capped by demonstrated financial need (Cost of Attendance minus Student Aid Index and all other financial aid). The subsidized figure shown above ({fmt(proratedSubGross)}) represents your <em>maximum possible</em> subsidized eligibility for {credits} enrolled credits. If your FAFSA financial need is not high enough to receive the full subsidized amount, the remaining unsupported portion automatically converts to a Direct Unsubsidized loan up to your total prorated limit of <strong>{fmt(proratedTotalGross)}</strong>.
                     </div>
+
+                    {/* Origination Fee Explanation */}
+                    <div style={S.educationBox}>
+                      <strong style={{ display: "block", marginBottom: 4 }}>
+                        Understanding the 1.057% Federal Origination Fee
+                      </strong>
+                      The U.S. Department of Education automatically deducts a statutory <strong>1.057% origination fee</strong> from all undergraduate Direct Subsidized and Unsubsidized Loans prior to semester disbursement. 
+                      Your <strong>Gross Prorated Loan</strong> ({fmt(proratedTotalGross)}) represents the principal debt balance added to your loan record that you must repay. Your <strong>Net Disbursement</strong> ({fmt(totalNet)}) is the exact dollar amount sent to Stockton to pay toward your Bursar account charges.
+                    </div>
+
+                    {/* Downward Adjustment Notice */}
+                    <div style={S.callout}>
+                      <strong style={{ color: "var(--stockton-blue-dark)", display: "block", marginBottom: 4 }}>
+                        Account Adjustments & Billing Notice
+                      </strong>
+                      If your prorated loan eligibility is <em>less</em> than what has already disbursed to your student account, an automatic downward adjustment will be made by the Financial Aid Office. This adjustment may create a balance due on your student account. Regularly check your account summary and billing status on the <strong>goStockton portal</strong>.
+                    </div>
+
+                    {/* Aggregate Limits Warning */}
+                    <div style={S.warningBox}>
+                      <strong style={{ color: "var(--color-warning)", display: "block", marginBottom: 4 }}>
+                        Federal Aggregate Loan Limits
+                      </strong>
+                      This calculator assumes you have remaining eligibility under federal cumulative borrowing limits ($31,000 for dependent undergraduates with up to $23,000 subsidized; $57,500 for independent undergraduates with up to $23,000 subsidized). If you have reached or are near aggregate maximums, your actual loan offer may be lower. Review your lifetime borrowing history at <strong>studentaid.gov</strong>.
+                    </div>
+
+                    {/* Action Steps & Office Contact Details */}
+                    <div style={{ ...S.callout, borderLeftColor: "var(--stockton-gold)", background: "var(--card-bg)" }}>
+                      <strong style={{ color: "var(--stockton-blue-dark)", display: "block", marginBottom: 6, fontSize: 14 }}>
+                        Action Steps & Financial Aid Advising
+                      </strong>
+                      <ul style={{ margin: "0 0 0.75rem 1.25rem", padding: 0, fontSize: 13, lineHeight: 1.65 }}>
+                        <li>
+                          <strong>Registration Changes (Adding or Dropping Credits):</strong> Proration is calculated based on your officially enrolled credits. If you adjust your registration after your loan has prorated, notify the Office of Financial Aid immediately, as your eligibility must be recalculated.
+                        </li>
+                        <li>
+                          <strong>Consortium Agreements:</strong> If you are taking courses at another college or university to satisfy remaining graduation requirements, an approved Consortium Agreement is required before those credits can be counted toward loan proration.
+                        </li>
+                      </ul>
+                      <div style={{ fontSize: 13, borderTop: "1px solid var(--border-color)", paddingTop: "0.5rem", lineHeight: 1.6 }}>
+                        <strong>Stockton University Office of Financial Aid</strong><br />
+                        📍 Campus Center Suite 201, 101 Vera King Farris Dr, Galloway, NJ 08205<br />
+                        📞 Phone: <strong>(609) 652-4203</strong> • ✉️ Email: <strong>finaid@stockton.edu</strong><br />
+                        📅 Appointments: Schedule in-person or virtual appointments at <a href="https://stockton.edu/contactfinaid" target="_blank" rel="noopener noreferrer"><strong>stockton.edu/contactfinaid</strong></a>
+                      </div>
+                    </div>
+
                   </div>
                 </div>
               </div>

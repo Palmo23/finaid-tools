@@ -5,11 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Stockton University — Summer Financial Aid Estimator</title>
   <link rel="stylesheet" href="../css/stockton-theme.css">
+  <script src="../js/finaid-core.js"></script>
   <style>
     .calc-wrap { width: 100%; max-width: 640px; margin: 2rem auto 4rem; }
     .step { background: #fff; border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; margin-bottom: 16px; box-shadow: var(--shadow-sm); }
     .step-label { font-size: 12px; font-weight: 500; color: var(--stockton-blue); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 8px; }
-    .step-title { font-size: 16px; font-weight: 600; color: var(--stockton-blue-dark); margin-bottom: 12px; }
+    .step-title { display: block; font-size: 16px; font-weight: 600; color: var(--stockton-blue-dark); margin-bottom: 12px; cursor: pointer; }
     .sub { font-size: 14px; color: var(--text-muted); margin-bottom: 1.75rem; }
     h2 { font-size: 24px; font-weight: 600; color: var(--stockton-blue-dark); margin-top: 1rem; margin-bottom: 0.5rem; }
     
@@ -98,7 +99,7 @@
 
   <div class="step">
     <div class="step-label">Step 1</div>
-    <div class="step-title">How many credits are you enrolling in?</div>
+    <label class="step-title" for="credits">How many credits are you enrolling in?</label>
     <div class="field-row">
       <input class="num-input" type="number" inputmode="numeric" id="credits" min="1" max="18" placeholder="0" oninput="update()">
       <span class="field-note">credits × $512 per credit</span>
@@ -117,7 +118,7 @@
 
   <div class="step" id="pell-step" style="display:none">
     <div class="step-label">Step 3</div>
-    <div class="step-title">What was the student's full-time Spring Pell amount?</div>
+    <label class="step-title" for="pell-spring">What was the student's full-time Spring Pell amount?</label>
     <div class="field-row">
       <span style="font-weight: 500; color: #666; font-size: 16px;">$</span>
       <input class="num-input" type="number" inputmode="numeric" id="pell-spring" min="0" placeholder="1650" oninput="update()">
@@ -128,7 +129,7 @@
 
   <div class="step" id="tag-step" style="display:none">
     <div class="step-label">Step 4</div>
-    <div class="step-title">Enter the student's NJ Expected Income (NJEI)</div>
+    <label class="step-title" for="njei">Enter the student's NJ Expected Income (NJEI)</label>
     <div class="field-row">
       <span style="font-weight: 500; color: #666; font-size: 16px;">$</span>
       <input class="num-input" type="number" inputmode="numeric" id="njei" min="0" max="9999" placeholder="2400" oninput="update()">
@@ -148,6 +149,8 @@
         <span class="summary-total-value" id="s-total">—</span>
       </div>
     </div>
+  </div>
+</div>
   </main>
 
   <div class="brand-bar">
@@ -155,7 +158,7 @@
   </div>
 
 <script>
-const TAG_TABLE = [
+const TAG_TABLE = (window.FinAidCore && window.FinAidCore.TAG_TABLE_SUMMER_2025) ? window.FinAidCore.TAG_TABLE_SUMMER_2025 : [
   { max: 1499, ft: 2374, tqt: 1780, ht: 1186 },
   { max: 2499, ft: 1980, tqt: 1484, ht: 990  },
   { max: 3499, ft: 1676, tqt: 1256, ht: 838  },

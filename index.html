@@ -80,7 +80,7 @@ autocomplete="off"
 
 </a>
 
-<a class="card tool" data-published="2026-07-06" href="calculators/obbba-financial-aid-guide_v5.html">
+<a class="card tool" data-published="2026-07-06" href="calculators/obbba-financial-aid-guide.html">
 
 <h3>OBBBA Financial Aid Guide</h3>
 
@@ -140,14 +140,6 @@ autocomplete="off"
 
 </a>
 
-<a class="card tool" data-published="2026-04-10" href="resources/policies.html">
-
-<h3>Office Policies</h3>
-
-<p>Internal financial aid references and procedures.</p>
-
-</a>
-
 </div>
 
 </section>
@@ -174,23 +166,29 @@ Financial Aid Toolkit • Version 1.3<br>
 const search=document.getElementById("search");
 const noResults=document.getElementById("no-results");
 
-search.addEventListener("keyup",()=>{
+function filterCards() {
+  const value = search.value.toLowerCase().trim();
+  let totalVisible = 0;
 
-const value=search.value.toLowerCase();
-let visibleCount=0;
+  document.querySelectorAll("section.category").forEach(category => {
+    let categoryVisible = 0;
+    const cards = category.querySelectorAll(".card.tool");
 
-document.querySelectorAll(".tool").forEach(card=>{
+    cards.forEach(card => {
+      const text = card.innerText.toLowerCase();
+      const match = text.includes(value);
+      card.style.display = match ? "flex" : "none";
+      if (match) categoryVisible++;
+    });
 
-const text=card.innerText.toLowerCase();
-const match=text.includes(value);
-card.style.display=match?"block":"none";
-if(match) visibleCount++;
+    category.style.display = categoryVisible > 0 ? "block" : "none";
+    totalVisible += categoryVisible;
+  });
 
-});
+  noResults.hidden = totalVisible !== 0;
+}
 
-noResults.hidden = visibleCount !== 0;
-
-});
+search.addEventListener("input", filterCards);
 
 (function(){
   const DAYS_THRESHOLD = 7; // Consider pages "new" if published within 7 days

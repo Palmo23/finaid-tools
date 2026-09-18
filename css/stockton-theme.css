@@ -330,6 +330,10 @@ textarea:focus {
   background-color: var(--card-bg);
 }
 
+input[type="range"] {
+  accent-color: var(--stockton-blue);
+}
+
 /* Buttons */
 .btn {
   display: inline-flex;

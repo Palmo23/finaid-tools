@@ -10,6 +10,8 @@
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <!-- Load Babel to compile JSX -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Stockton Financial Aid Core Engine -->
+  <script src="../js/finaid-core.js"></script>
 </head>
 <body>
   <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -42,136 +44,19 @@
   <script type="text/babel">
     const { useState, useMemo } = React;
 
-    // Constants based on HESAA 2026-27 Schedule & Federal Guidelines
-    const MAX_PELL = 7395;
-    const MIN_PELL = 739.50;
-    const ORIGINATION_FEE_RATE = 0.01057; // 1.057%
+    // Financial Aid Constants and Engines imported from central finaid-core.js
+    const {
+      MAX_PELL,
+      MIN_PELL,
+      ORIGINATION_FEE_RATE,
+      TAG_TABLE_2026_2027: TAG_TABLE,
+      calculateTag: calcTag,
+      calculatePell: calcPell,
+      calculateLoanFees: calcLoan
+    } = window.FinAidCore;
 
-    // 2026-2027 Stockton University Tuition Aid Grant (TAG) Schedule (Attachment B)
-    const TAG_TABLE = [
-      { min: -Infinity, max: 1499, label: "Under 1500", annual: 9496, fall: 4748, spring: 4748 },
-      { min: 1500, max: 2499, label: "1500 – 2499", annual: 7922, fall: 3961, spring: 3961 },
-      { min: 2500, max: 3499, label: "2500 – 3499", annual: 6706, fall: 3353, spring: 3353 },
-      { min: 3500, max: 4499, label: "3500 – 4499", annual: 5554, fall: 2777, spring: 2777 },
-      { min: 4500, max: 5499, label: "4500 – 5499", annual: 4604, fall: 2302, spring: 2302 },
-      { min: 5500, max: 6499, label: "5500 – 6499", annual: 3594, fall: 1797, spring: 1797 },
-      { min: 6500, max: 7499, label: "6500 – 7499", annual: 2616, fall: 1308, spring: 1308 },
-      { min: 7500, max: Infinity, label: "7500+", annual: 0, fall: 0, spring: 0 }
-    ];
-
-    function fmt$(val) {
-      if (val === null || val === undefined || isNaN(val)) return "$0.00";
-      return val.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-
-    function fmtWhole$(val) {
-      if (val === null || val === undefined || isNaN(val)) return "$0";
-      return val.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0, maximumFractionDigits: 0 });
-    }
-
-    function calcTag(njeiInput) {
-      if (njeiInput === "" || njeiInput === null || isNaN(Number(njeiInput))) {
-        return null;
-      }
-      const val = Math.floor(Number(njeiInput));
-      const match = TAG_TABLE.find(row => val >= row.min && val <= row.max);
-      return match || { min: 7500, max: Infinity, label: "7500+", annual: 0, fall: 0, spring: 0 };
-    }
-
-    function calcPell(saiInput) {
-      if (saiInput === "" || saiInput === null || isNaN(Number(saiInput))) {
-        return null;
-      }
-      const sai = Math.floor(Number(saiInput));
-
-      if (sai > MAX_PELL) {
-        return {
-          annual: 0,
-          fall: 0,
-          spring: 0,
-          status: "ineligible",
-          note: `SAI of ${sai} exceeds maximum eligibility threshold (${MAX_PELL}). Not eligible for Federal Pell Grant.`
-        };
-      }
-
-      if (sai <= 0) {
-        const fall = 3698;
-        const spring = 3697;
-        return {
-          annual: MAX_PELL,
-          fall,
-          spring,
-          status: "maximum",
-          note: `SAI ≤ 0 qualifies for the Maximum Federal Pell Grant of ${fmtWhole$(MAX_PELL)}.`
-        };
-      }
-
-      // Calculated Pell: 7395 - SAI, rounded to nearest $5
-      const calculated = MAX_PELL - sai;
-      const rounded = Math.round(calculated / 5) * 5;
-
-      if (rounded < MIN_PELL) {
-        return {
-          annual: 0,
-          fall: 0,
-          spring: 0,
-          status: "ineligible",
-          note: `Calculated amount (${fmtWhole$(MAX_PELL)} − ${fmtWhole$(sai)} = ${fmtWhole$(calculated)}) rounded to ${fmtWhole$(rounded)} falls below minimum threshold of ${fmt$(MIN_PELL)}.`
-        };
-      }
-
-      const fall = Math.ceil(rounded / 2);
-      const spring = rounded - fall;
-
-      return {
-        annual: rounded,
-        fall,
-        spring,
-        status: "calculated",
-        note: `Calculated award: ${fmtWhole$(MAX_PELL)} − ${fmtWhole$(sai)} = ${fmtWhole$(calculated)}, rounded to nearest $5 = ${fmtWhole$(rounded)}.`
-      };
-    }
-
-    function calcLoan(acceptedGross) {
-      const gross = Math.max(0, Number(acceptedGross) || 0);
-      if (gross <= 0) {
-        return {
-          annualGross: 0,
-          fallGross: 0,
-          springGross: 0,
-          annualFee: 0,
-          fallFee: 0,
-          springFee: 0,
-          annualNet: 0,
-          fallNet: 0,
-          springNet: 0
-        };
-      }
-
-      const fallGross = gross / 2;
-      const springGross = gross / 2;
-
-      // 1.057% origination fee per semester
-      const fallFee = fallGross * ORIGINATION_FEE_RATE;
-      const springFee = springGross * ORIGINATION_FEE_RATE;
-      const annualFee = fallFee + springFee;
-
-      const fallNet = fallGross - fallFee;
-      const springNet = springGross - springFee;
-      const annualNet = fallNet + springNet;
-
-      return {
-        annualGross: gross,
-        fallGross,
-        springGross,
-        annualFee,
-        fallFee,
-        springFee,
-        annualNet,
-        fallNet,
-        springNet
-      };
-    }
+    const fmt$ = (val) => window.FinAidCore.formatCurrency(val, 2, 2);
+    const fmtWhole$ = (val) => window.FinAidCore.formatCurrency(val, 0, 0);
 
     function App() {
       // Inputs
